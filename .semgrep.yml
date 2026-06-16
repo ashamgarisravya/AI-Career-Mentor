@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 rules:
   - id: avoid-print
     pattern: print(...)
@@ -5,3 +6,20 @@ rules:
     severity: WARNING
     languages:
       - python
+=======
+rules:
+  - id: python-dangerous-subprocess-shell
+    message: Avoid shell=True with subprocess calls.
+    severity: WARNING
+    languages:
+      - python
+    patterns:
+      - pattern: subprocess.$FUNC(..., shell=True, ...)
+  - id: python-hardcoded-secret-placeholder
+    message: Avoid hardcoded secrets. Use environment variables and .env.example placeholders.
+    severity: WARNING
+    languages:
+      - python
+    patterns:
+      - pattern-regex: (?i)(api_key|secret|password|token)\s*=\s*["'][^"']+["']
+>>>>>>> 7a22386f (chore: add compliance tooling and documentation)

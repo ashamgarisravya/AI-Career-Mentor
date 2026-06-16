@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Changelog
 
 All notable changes to this project will be documented in this file.
@@ -16,3 +17,16 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 - Improved repository compliance and maintainability
+=======
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on Keep a Changelog, and this project uses Git-Cliff for automated changelog generation.
+
+## [Unreleased]
+
+### Added
+
+- Repository compliance documentation, health files, testing, security checks, and CI tooling.
+>>>>>>> 7a22386f (chore: add compliance tooling and documentation)

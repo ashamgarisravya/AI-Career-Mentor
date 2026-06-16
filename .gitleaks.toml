@@ -1,0 +1,14 @@
+title = "AI Career Mentor Gitleaks Configuration"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Allow documented placeholder values"
+regexes = [
+  '''APP_ENV=development''',
+  '''NEXT_PUBLIC_API_URL=http://localhost:8000'''
+]
+paths = [
+  '''.env.example'''
+]
