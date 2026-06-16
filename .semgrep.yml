@@ -1,13 +1,10 @@
-<<<<<<< HEAD
 rules:
   - id: avoid-print
     pattern: print(...)
-    message: Avoid print statements in production code
+    message: Avoid print statements in production code.
     severity: WARNING
     languages:
       - python
-=======
-rules:
   - id: python-dangerous-subprocess-shell
     message: Avoid shell=True with subprocess calls.
     severity: WARNING
@@ -22,4 +19,3 @@ rules:
       - python
     patterns:
       - pattern-regex: (?i)(api_key|secret|password|token)\s*=\s*["'][^"']+["']
->>>>>>> 7a22386f (chore: add compliance tooling and documentation)

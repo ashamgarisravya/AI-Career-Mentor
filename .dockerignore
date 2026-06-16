@@ -1,29 +1,3 @@
-<<<<<<< HEAD
-.git
-.gitignore
-.venv
-venv
-__pycache__
-*.pyc
-*.pyo
-*.pyd
-
-.env
-.env.*
-
-.pytest_cache
-.coverage
-
-.vscode
-.idea
-
-node_modules
-
-dist
-build
-
-*.log
-=======
 .git
 .gitlab-ci.yml
 .mypy_cache
@@ -44,4 +18,3 @@ frontend/dist
 node_modules
 dist
 build
->>>>>>> 7a22386f (chore: add compliance tooling and documentation)

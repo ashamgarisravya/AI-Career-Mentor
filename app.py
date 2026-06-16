@@ -1,3 +1,5 @@
+from os import getenv
+
 from fastapi import FastAPI
 
 app = FastAPI()
@@ -11,4 +13,9 @@ def home() -> dict[str, str]:
 def main() -> None:  # pragma: no cover
     import uvicorn
 
-    uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=False)
+    uvicorn.run(
+        "app:app",
+        host=getenv("APP_HOST", "127.0.0.1"),
+        port=int(getenv("APP_PORT", "8000")),
+        reload=False,
+    )

@@ -1,42 +1,10 @@
-<<<<<<< HEAD
-# AGENTS.md
-
-## Project Overview
-
-AI Career Mentor is an AI-powered career guidance platform that provides personalized recommendations, skill gap analysis, and career roadmaps.
-
-## Agent Responsibilities
-
-### Career Guidance Agent
-
-* Analyzes user interests and goals.
-* Recommends suitable career paths.
-
-### Skill Analysis Agent
-
-* Identifies missing skills.
-* Suggests learning resources.
-
-### Recommendation Agent
-
-* Generates personalized recommendations.
-* Creates career development roadmaps.
-
-## Development Notes
-
-* Backend: Python, FastAPI
-* Frontend: HTML, CSS, JavaScript
-* AI Integration: Generative AI / LLM
-
-## Repository Structure
-
-* frontend/ : User interface files
-* backend/ : API and business logic
-* docs/ : Documentation files
-=======
 # AI Agent Instructions
 
 This repository may be edited by AI coding agents. Agents must protect user work, keep changes focused, and preserve a clean compliance posture.
+
+## Project Overview
+
+AI Career Mentor is an AI-powered career guidance platform that provides personalized recommendations, skill-gap analysis, and career roadmaps.
 
 ## Repository Context
 
@@ -45,6 +13,23 @@ This repository may be edited by AI coding agents. Agents must protect user work
 - Python tool configuration: `pyproject.toml`
 - GitLab CI pipeline: `.gitlab-ci.yml`
 - Product specifications: `specs/`
+
+## Agent Responsibilities
+
+### Career Guidance Agent
+
+- Analyzes user interests and goals.
+- Recommends suitable career paths.
+
+### Skill Analysis Agent
+
+- Identifies missing skills.
+- Suggests learning resources.
+
+### Recommendation Agent
+
+- Generates personalized recommendations.
+- Creates career development roadmaps.
 
 ## Required Practices
 
@@ -63,7 +48,7 @@ ruff check .
 ruff format --check .
 mypy .
 pytest --cov=. --cov-fail-under=80
-bandit -r .
+bandit -c pyproject.toml -r .
 pip-audit
 ```
 
@@ -76,4 +61,3 @@ pip-audit
 ## Spec-Kit
 
 For new features, add or update a specification under `specs/` before implementation when the behavior is non-trivial.
->>>>>>> 7a22386f (chore: add compliance tooling and documentation)
