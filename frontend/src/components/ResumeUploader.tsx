@@ -4,9 +4,17 @@ import { useState } from "react";
 import { FileText, UploadCloud } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
 
-export function ResumeUploader({ onAnalyze, loading }: { onAnalyze: (file?: File) => void; loading?: boolean }) {
+export function ResumeUploader({
+  onAnalyze,
+  loading
+}: {
+  onAnalyze: (file?: File, resumeText?: string) => void;
+  loading?: boolean;
+}) {
   const [file, setFile] = useState<File | undefined>();
+  const [resumeText, setResumeText] = useState("");
 
   return (
     <Card>
@@ -14,11 +22,11 @@ export function ResumeUploader({ onAnalyze, loading }: { onAnalyze: (file?: File
         <label className="flex min-h-44 cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed bg-muted/40 p-6 text-center transition hover:bg-muted">
           <UploadCloud className="mb-3 h-8 w-8 text-primary" />
           <span className="text-sm font-medium">Upload resume PDF</span>
-          <span className="mt-1 text-xs text-muted-foreground">PDF files up to 10MB</span>
+          <span className="mt-1 text-xs text-muted-foreground">PDF files up to 10MB, or paste resume text below</span>
           <input
             className="sr-only"
             type="file"
-            accept="application/pdf"
+            accept="application/pdf,text/plain"
             onChange={(event) => setFile(event.target.files?.[0])}
           />
         </label>
@@ -28,7 +36,13 @@ export function ResumeUploader({ onAnalyze, loading }: { onAnalyze: (file?: File
             <span className="truncate">{file.name}</span>
           </div>
         ) : null}
-        <Button className="w-full" onClick={() => onAnalyze(file)} disabled={loading}>
+        <Textarea
+          placeholder="Optional: paste your resume text here if you don't have a PDF handy."
+          value={resumeText}
+          onChange={(event) => setResumeText(event.target.value)}
+          rows={10}
+        />
+        <Button className="w-full" onClick={() => onAnalyze(file, resumeText)} disabled={loading || (!file && !resumeText.trim())}>
           Analyze Resume
         </Button>
       </CardContent>

@@ -2,18 +2,19 @@
 
 import { Award, BookOpenCheck, Gauge, Target } from "lucide-react";
 import { CareerCard } from "@/components/CareerCard";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { RoadmapTimeline } from "@/components/RoadmapTimeline";
 import { Sidebar } from "@/components/Sidebar";
 import { SkillGapCard } from "@/components/SkillGapCard";
-import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useCareerBuilder } from "@/hooks/useCareerBuilder";
 
 export default function DashboardPage() {
-  const { careers, skillGaps, roadmap, loading, error } = useCareerBuilder();
+  const { dashboard, careers, skillGaps, roadmap, loading, error } = useCareerBuilder();
 
   const stats = [
-    { label: "Top match", value: `${careers[0]?.matchScore ?? 0}%`, icon: Award },
-    { label: "ATS score", value: "78%", icon: Gauge },
+    { label: "Career fit", value: `${dashboard?.careerFit ?? 0}%`, icon: Award },
+    { label: "ATS score", value: `${dashboard?.atsScore ?? 0}%`, icon: Gauge },
     { label: "Skill gaps", value: skillGaps.length.toString(), icon: Target },
     { label: "Roadmap months", value: roadmap.length.toString(), icon: BookOpenCheck }
   ];
@@ -24,7 +25,7 @@ export default function DashboardPage() {
       <main className="page-shell space-y-6">
         <div>
           <h1 className="text-3xl font-bold tracking-normal">Dashboard</h1>
-          <p className="text-muted-foreground">Your career readiness snapshot and next best moves.</p>
+          <p className="text-muted-foreground">Your complete career coaching snapshot across fit, resume readiness, skill gaps, roadmap, and mentor advice.</p>
         </div>
         {loading ? <LoadingSpinner label="Loading dashboard" /> : null}
         {error ? <p className="rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">{error}</p> : null}
@@ -44,12 +45,65 @@ export default function DashboardPage() {
             );
           })}
         </div>
+        <section className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+          <Card>
+            <CardHeader>
+              <CardTitle>AI Mentor Advice</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-muted-foreground">{dashboard?.mentorSummary ?? "Create your profile to start receiving mentor advice."}</p>
+              <div>
+                <p className="mb-2 text-sm font-medium">Strengths</p>
+                <div className="flex flex-wrap gap-2">
+                  {(dashboard?.strengths ?? []).map((item) => (
+                    <span key={item} className="rounded-md bg-primary/10 px-3 py-1 text-xs text-primary">{item}</span>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <p className="mb-2 text-sm font-medium">Weaknesses</p>
+                <div className="space-y-2 text-sm text-muted-foreground">
+                  {(dashboard?.weaknesses ?? []).map((item) => <p key={item}>{item}</p>)}
+                </div>
+              </div>
+              <div>
+                <p className="mb-2 text-sm font-medium">Next steps</p>
+                <div className="space-y-2 text-sm text-muted-foreground">
+                  {(dashboard?.nextSteps ?? []).map((item) => <p key={item}>{item}</p>)}
+                </div>
+              </div>
+              <div>
+                <p className="mb-2 text-sm font-medium">Resume suggestions</p>
+                <div className="space-y-2 text-sm text-muted-foreground">
+                  {(dashboard?.resumeSuggestions ?? []).map((item) => <p key={item}>{item}</p>)}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Top careers</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {careers.map((career) => (
+                <div key={career.id} className="rounded-md bg-muted p-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="font-medium">{career.title}</span>
+                    <span className="text-sm text-primary">{career.matchScore}%</span>
+                  </div>
+                  <p className="mt-1 text-xs text-muted-foreground">{career.mentorFeedback}</p>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </section>
         <section className="grid gap-4 lg:grid-cols-3">
           {careers.map((career) => <CareerCard key={career.id} career={career} />)}
         </section>
         <section className="grid gap-4 lg:grid-cols-3">
           {skillGaps.map((gap) => <SkillGapCard key={gap.id} gap={gap} />)}
         </section>
+        <RoadmapTimeline roadmap={roadmap} />
       </main>
     </div>
   );

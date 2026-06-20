@@ -8,7 +8,6 @@ Responsive Next.js 15 frontend for a hackathon AI career coach that helps users 
 - TypeScript
 - Tailwind CSS
 - Shadcn UI-style components
-- Axios
 - React Hook Form
 - Zod
 - Dark mode with `next-themes`
@@ -24,13 +23,13 @@ Open `http://localhost:3000`.
 
 ## API
 
-The UI uses mock data by default. Configure a backend with:
+The UI calls the FastAPI backend. Configure the API base URL with:
 
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:8000/api
 ```
 
-The service layer is in `src/services/api.ts`, and app state helpers are in `src/hooks/useCareerBuilder.ts`.
+The service layer defaults to `http://localhost:8000/api` when this variable is not set. It lives in `src/services/api.ts`, and app state helpers are in `src/hooks/useCareerBuilder.ts`.
 
 ## Pages
 

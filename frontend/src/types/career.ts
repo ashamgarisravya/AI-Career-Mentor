@@ -1,13 +1,33 @@
 export type SkillPriority = "High" | "Medium" | "Low";
 
+export interface UserProfile {
+  name: string;
+  education: string;
+  degree: string;
+  branch: string;
+  experienceLevel: string;
+  currentSkills: string[];
+  interests: string[];
+  preferredRoles: string[];
+  resumeText?: string;
+}
+
+export interface ProfileAnalysis {
+  readinessScore: number;
+  strengths: string[];
+  weaknesses: string[];
+  mentorSummary: string;
+}
+
 export interface CareerRecommendation {
   id: string;
   title: string;
   matchScore: number;
   salaryRange: string;
-  growth: string;
+  growthRate: string;
   description: string;
   skills: string[];
+  mentorFeedback: string;
 }
 
 export interface SkillGap {
@@ -19,13 +39,6 @@ export interface SkillGap {
   resources: string[];
 }
 
-export interface RoadmapMonth {
-  month: string;
-  title: string;
-  goals: string[];
-  resources: LearningResource[];
-}
-
 export interface LearningResource {
   title: string;
   type: "Course" | "Project" | "Article" | "Practice";
@@ -33,20 +46,30 @@ export interface LearningResource {
   url?: string;
 }
 
+export interface RoadmapMonth {
+  month: string;
+  title: string;
+  goals: string[];
+  resources: LearningResource[];
+}
+
 export interface ResumeAnalysis {
   atsScore: number;
   strengths: string[];
-  missingSkills: SkillGap[];
+  missingSkills: string[];
+  suggestions: string[];
   summary: string;
 }
 
-export interface UserProfile {
-  name: string;
-  email: string;
-  currentRole: string;
-  experienceLevel: string;
-  targetRole: string;
-  location: string;
-  skills: string[];
-  interests: string[];
+export interface DashboardSummary {
+  careerFit: number;
+  atsScore: number;
+  mentorSummary: string;
+  topCareers: CareerRecommendation[];
+  skillGaps: SkillGap[];
+  roadmap: RoadmapMonth[];
+  strengths: string[];
+  weaknesses: string[];
+  nextSteps: string[];
+  resumeSuggestions: string[];
 }

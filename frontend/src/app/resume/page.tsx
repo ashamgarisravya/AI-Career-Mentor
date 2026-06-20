@@ -2,7 +2,6 @@
 
 import { ResumeUploader } from "@/components/ResumeUploader";
 import { Sidebar } from "@/components/Sidebar";
-import { SkillGapCard } from "@/components/SkillGapCard";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -17,7 +16,7 @@ export default function ResumePage() {
       <main className="page-shell space-y-6">
         <div>
           <h1 className="text-3xl font-bold tracking-normal">Resume Analysis</h1>
-          <p className="text-muted-foreground">Upload a PDF and review ATS readiness, strengths, and missing skills.</p>
+          <p className="text-muted-foreground">Upload a PDF or paste resume text to get ATS score, strengths, missing skills, and revision guidance.</p>
         </div>
         <div className="grid gap-6 lg:grid-cols-[360px_1fr]">
           <ResumeUploader onAnalyze={runResumeAnalysis} loading={loading} />
@@ -48,13 +47,28 @@ export default function ResumePage() {
                     ))}
                   </CardContent>
                 </Card>
-                <div className="grid gap-4 xl:grid-cols-2">
-                  {resumeAnalysis.missingSkills.map((gap) => <SkillGapCard key={gap.id} gap={gap} />)}
-                </div>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Missing skills</CardTitle>
+                  </CardHeader>
+                  <CardContent className="flex flex-wrap gap-2">
+                    {resumeAnalysis.missingSkills.map((skill) => (
+                      <span key={skill} className="rounded-md bg-secondary px-3 py-1 text-sm">{skill}</span>
+                    ))}
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Suggestions</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2 text-sm text-muted-foreground">
+                    {resumeAnalysis.suggestions.map((suggestion) => <p key={suggestion}>{suggestion}</p>)}
+                  </CardContent>
+                </Card>
               </>
             ) : (
               <Card>
-                <CardContent className="p-6 text-sm text-muted-foreground">Run an analysis to see ATS score and missing skills.</CardContent>
+                <CardContent className="p-6 text-sm text-muted-foreground">Run an analysis to see ATS score and personalized resume suggestions.</CardContent>
               </Card>
             )}
           </section>

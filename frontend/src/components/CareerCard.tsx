@@ -31,9 +31,12 @@ export function CareerCard({ career }: { career: CareerRecommendation }) {
           <div className="rounded-md bg-muted p-3">
             <p className="text-muted-foreground">Growth</p>
             <p className="flex items-center gap-1 font-semibold text-primary">
-              {career.growth} <ArrowUpRight className="h-3 w-3" />
+              {career.growthRate} <ArrowUpRight className="h-3 w-3" />
             </p>
           </div>
+        </div>
+        <div className="rounded-md border border-border/60 bg-background/60 p-3 text-sm text-muted-foreground">
+          {career.mentorFeedback}
         </div>
         <div className="flex flex-wrap gap-2">
           {career.skills.map((skill) => (
