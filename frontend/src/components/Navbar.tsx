@@ -22,6 +22,7 @@ export function Navbar() {
           <Link href="/careers" className="hover:text-foreground">Careers</Link>
           <Link href="/resume" className="hover:text-foreground">Resume</Link>
           <Link href="/roadmap" className="hover:text-foreground">Roadmap</Link>
+          <Link href="/interview" className="hover:text-foreground">Interview</Link>
         </nav>
         <Button
           variant="outline"

@@ -12,6 +12,9 @@ env/
 
 # FastAPI / local tooling
 *.log
+.coverage
+.pip-audit-cache/
+.audit-cache/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/

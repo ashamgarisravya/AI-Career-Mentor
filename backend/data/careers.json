@@ -1,0 +1,50 @@
+[
+  {
+    "title": "Machine Learning Engineer",
+    "description": "Build, train, evaluate, and deploy machine learning systems for production products.",
+    "required_skills": ["Python", "NumPy", "Pandas", "Scikit-learn", "Machine Learning", "Deep Learning", "FastAPI", "Docker"],
+    "salary_range": "$115k - $175k",
+    "growth_rate": "+23%",
+    "roadmap": ["Learn NumPy and Pandas", "Train baseline ML models", "Build an ML API", "Containerize and deploy a model service"]
+  },
+  {
+    "title": "Data Scientist",
+    "description": "Use statistics, experimentation, and modeling to turn data into business insights and predictions.",
+    "required_skills": ["Python", "SQL", "Statistics", "Pandas", "Machine Learning", "Visualization", "Experimentation"],
+    "salary_range": "$100k - $155k",
+    "growth_rate": "+18%",
+    "roadmap": ["Strengthen statistics", "Practice SQL and EDA", "Build predictive modeling projects", "Present findings with dashboards"]
+  },
+  {
+    "title": "AI Product Manager",
+    "description": "Guide AI product strategy by connecting user needs, data capability, and product execution.",
+    "required_skills": ["Product Strategy", "Roadmapping", "Analytics", "User Research", "Prompt Engineering", "Communication"],
+    "salary_range": "$125k - $190k",
+    "growth_rate": "+21%",
+    "roadmap": ["Study AI product cases", "Learn analytics for product decisions", "Practice writing PRDs", "Run user problem discovery"]
+  },
+  {
+    "title": "Software Engineer",
+    "description": "Design and ship reliable software features across backend systems, APIs, and application logic.",
+    "required_skills": ["Python", "Data Structures", "Algorithms", "Git", "APIs", "Testing"],
+    "salary_range": "$100k - $155k",
+    "growth_rate": "+15%",
+    "roadmap": ["Review data structures", "Build API-driven projects", "Add testing discipline", "Practice coding interviews"]
+  },
+  {
+    "title": "Data Engineer",
+    "description": "Create data pipelines, storage systems, and transformation workflows for analytics and ML teams.",
+    "required_skills": ["Python", "SQL", "ETL", "Data Warehousing", "Spark", "Cloud"],
+    "salary_range": "$110k - $170k",
+    "growth_rate": "+22%",
+    "roadmap": ["Learn ETL patterns", "Practice warehouse modeling", "Build batch pipelines", "Deploy cloud data workflows"]
+  },
+  {
+    "title": "Generative AI Engineer",
+    "description": "Build applications powered by LLMs, retrieval systems, prompt workflows, and model integrations.",
+    "required_skills": ["Python", "LLMs", "Prompt Engineering", "RAG", "Vector Databases", "APIs", "Evaluation"],
+    "salary_range": "$120k - $185k",
+    "growth_rate": "+24%",
+    "roadmap": ["Learn prompt design", "Build a retrieval app", "Evaluate output quality", "Deploy an LLM-backed product feature"]
+  }
+]

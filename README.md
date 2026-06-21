@@ -1,11 +1,12 @@
 # AI Career Mentor
 
-AI Career Mentor is a full-stack career guidance project with a Python FastAPI backend and a Next.js frontend. The backend exposes an API foundation for career coaching workflows, while the frontend provides pages for career discovery, resume review, skill-gap analysis, and roadmap planning.
+AI Career Mentor is a full-stack career guidance project with a Python FastAPI backend and a Next.js frontend. The backend exposes an API foundation for career coaching workflows, while the frontend provides pages for career discovery, resume review, skill-gap analysis, roadmap planning, and interview preparation.
 
 ## Features
 
 - FastAPI backend entry point in `app.py`.
 - Next.js frontend in `frontend/`.
+- Functional API routes for profile, dashboard, career recommendations, resume analysis, skill gaps, roadmaps, and interview preparation.
 - Python quality tooling for linting, formatting, typing, testing, coverage, and security checks.
 - GitLab CI pipeline with visible lint, format, type-check, test, coverage, and security jobs.
 - Spec-Kit structure for documenting product requirements before implementation.

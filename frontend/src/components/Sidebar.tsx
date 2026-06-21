@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BarChart3, Compass, FileText, Map, Target, UserRound } from "lucide-react";
+import { BarChart3, Compass, FileText, Map, Target, UserRound, UserSearch } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const items = [
@@ -11,6 +11,7 @@ const items = [
   { href: "/resume", label: "Resume", icon: FileText },
   { href: "/skill-gap", label: "Skill gaps", icon: Target },
   { href: "/roadmap", label: "Roadmap", icon: Map },
+  { href: "/interview", label: "Interview prep", icon: UserSearch },
   { href: "/profile", label: "Profile", icon: UserRound }
 ];
 

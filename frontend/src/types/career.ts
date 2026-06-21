@@ -61,6 +61,20 @@ export interface ResumeAnalysis {
   summary: string;
 }
 
+export interface InterviewQuestion {
+  question: string;
+  focusArea: string;
+  answerTips: string[];
+}
+
+export interface InterviewPreparation {
+  targetRole: string;
+  readinessScore: number;
+  practicePlan: string[];
+  questions: InterviewQuestion[];
+  tips: string[];
+}
+
 export interface DashboardSummary {
   careerFit: number;
   atsScore: number;

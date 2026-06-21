@@ -1,6 +1,7 @@
 import type {
   CareerRecommendation,
   DashboardSummary,
+  InterviewPreparation,
   ProfileAnalysis,
   ResumeAnalysis,
   RoadmapMonth,
@@ -101,6 +102,10 @@ export async function getSkillGaps() {
 
 export async function getRoadmap() {
   return request<RoadmapMonth[]>("/roadmap");
+}
+
+export async function getInterviewPreparation() {
+  return request<InterviewPreparation>("/interview/prep");
 }
 
 export async function getDashboard() {

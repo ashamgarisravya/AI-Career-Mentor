@@ -5,6 +5,7 @@ import {
   analyzeResume,
   getCareerRecommendations,
   getDashboard,
+  getInterviewPreparation,
   getProfile,
   getRoadmap,
   getSkillGaps,
@@ -13,6 +14,7 @@ import {
 import type {
   CareerRecommendation,
   DashboardSummary,
+  InterviewPreparation,
   ProfileAnalysis,
   ResumeAnalysis,
   RoadmapMonth,
@@ -40,6 +42,7 @@ export function useCareerBuilder() {
   const [skillGaps, setSkillGaps] = useState<SkillGap[]>([]);
   const [roadmap, setRoadmap] = useState<RoadmapMonth[]>([]);
   const [resumeAnalysis, setResumeAnalysis] = useState<ResumeAnalysis | null>(null);
+  const [interviewPreparation, setInterviewPreparation] = useState<InterviewPreparation | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -150,6 +153,18 @@ export function useCareerBuilder() {
     }
   }, []);
 
+  const loadInterviewPreparation = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      setInterviewPreparation(await getInterviewPreparation());
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to load interview preparation.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     void loadDashboard();
   }, [loadDashboard]);
@@ -162,6 +177,7 @@ export function useCareerBuilder() {
     skillGaps,
     roadmap,
     resumeAnalysis,
+    interviewPreparation,
     loading,
     error,
     loadDashboard,
@@ -170,6 +186,7 @@ export function useCareerBuilder() {
     discoverCareers,
     runResumeAnalysis,
     loadSkillGaps,
-    loadRoadmap
+    loadRoadmap,
+    loadInterviewPreparation
   };
 }
