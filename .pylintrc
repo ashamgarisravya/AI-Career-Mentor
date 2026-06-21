@@ -1,22 +1,7 @@
 [MASTER]
-ignore=venv,.venv,__pycache__
 
 [MESSAGES CONTROL]
-disable=
-    C0114,
-    C0115,
-    C0116
+disable=C0114,C0115,C0116
 
 [FORMAT]
 max-line-length=100
-
-[DESIGN]
-max-args=10
-
-[TYPECHECK]
-ignored-modules=
-
-[REPORTS]
-output-format=text
-reports=no
-score=yes
