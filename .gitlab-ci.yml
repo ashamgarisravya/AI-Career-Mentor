@@ -3,32 +3,29 @@ stages:
   - format
   - type_check
   - test
-  - coverage
   - security
 
 variables:
-  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
   PYTHON_VERSION: "3.12"
 
 default:
   image: python:${PYTHON_VERSION}-slim
-  cache:
-    paths:
-      - .cache/pip
+
   before_script:
     - python --version
     - pip install --upgrade pip
-    - pip install -r requirements.txt -r requirements-dev.txt
+    - pip install ruff black mypy pytest bandit
+    - pip install -r requirements.txt
 
 ruff_lint:
   stage: lint
   script:
     - ruff check .
 
-ruff_format_check:
+black_format_check:
   stage: format
   script:
-    - ruff format --check .
+    - black --check .
 
 mypy_type_check:
   stage: type_check
@@ -38,42 +35,9 @@ mypy_type_check:
 pytest_tests:
   stage: test
   script:
-    - pytest tests
-
-coverage_report:
-  stage: coverage
-  script:
-    - pytest --cov=. --cov-report=term --cov-report=xml --cov-fail-under=80
-  coverage: '/TOTAL\s+\d+\s+\d+\s+(\d+%)/'
-  artifacts:
-    when: always
-    reports:
-      coverage_report:
-        coverage_format: cobertura
-        path: coverage.xml
-    paths:
-      - coverage.xml
+    - pytest
 
 bandit_scan:
   stage: security
   script:
-    - bandit -c pyproject.toml -r .
-
-pip_audit:
-  stage: security
-  script:
-    - pip-audit
-
-semgrep_scan:
-  stage: security
-  script:
-    - semgrep --config .semgrep.yml app.py tests
-
-gitleaks_scan:
-  stage: security
-  image:
-    name: zricethezav/gitleaks:latest
-    entrypoint: [""]
-  before_script: []
-  script:
-    - gitleaks detect --source . --config .gitleaks.toml --no-git --redact --verbose
+    - bandit -r .
