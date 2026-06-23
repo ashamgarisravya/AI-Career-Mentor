@@ -20,17 +20,17 @@ default:
 ruff_lint:
   stage: lint
   script:
-    - ruff check .
+    -python -m  ruff check .
 
 black_format_check:
   stage: format
   script:
-    - black --check .
+    - python -m black --check .
 
 mypy_type_check:
   stage: type_check
   script:
-    - mypy .
+    -python -m mypy .
 
 pytest_tests:
   stage: test
