@@ -1,0 +1,11 @@
+{
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/.pytest_cache": true
+  },
+  "editor.formatOnSave": true,
+  "python.defaultInterpreterPath": ".venv",
+  "python.testing.pytestEnabled": true,
+  "python.linting.enabled": true,
+  "editor.tabSize": 4
+}
