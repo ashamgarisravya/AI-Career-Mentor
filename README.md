@@ -47,41 +47,44 @@ Key design points:
 
 ```text
 AI Career Mentor/
-├── app.py
-├── requirements.txt
-├── .env.example
-├── README.md
-├── docs/
-│   ├── INSTALLATION.md
-│   ├── USER_GUIDE.md
-│   └── DEPLOYMENT.md
-├── pages/
-│   ├── Dashboard.py
-│   ├── Profile.py
-│   ├── Resume_Analyzer.py
-│   ├── Career_Recommendation.py
-│   ├── Skill_Gap.py
-│   ├── Learning_Roadmap.py
-│   ├── Interview_Prep.py
-│   ├── Resume_Builder.py
-│   └── Settings.py
-├── utils/
-│   ├── ai.py
-│   ├── ats.py
-│   ├── charts.py
-│   ├── database.py
-│   ├── interview.py
-│   ├── knowledge.py
-│   ├── pdf_parser.py
-│   ├── production.py
-│   ├── resume_builder.py
-│   ├── roadmap.py
-│   └── ui.py
-├── database/
-│   └── app.db
-├── generated/
-├── logs/
-└── assets/
+|-- app.py
+|-- requirements.txt
+|-- .env.example
+|-- README.md
+|-- USER_MANUAL.md
+|-- AGENTS.md
+|-- SECURITY.md
+|-- Dockerfile
+|-- docs/
+|   |-- INSTALLATION.md
+|   |-- USER_GUIDE.md
+|   `-- DEPLOYMENT.md
+|-- pages/
+|   |-- Dashboard.py
+|   |-- Profile.py
+|   |-- Resume_Analyzer.py
+|   |-- Career_Recommendation.py
+|   |-- Skill_Gap.py
+|   |-- Learning_Roadmap.py
+|   |-- Interview_Prep.py
+|   |-- Resume_Builder.py
+|   `-- Settings.py
+|-- utils/
+|   |-- ai.py
+|   |-- ats.py
+|   |-- charts.py
+|   |-- database.py
+|   |-- interview.py
+|   |-- knowledge.py
+|   |-- pdf_parser.py
+|   |-- production.py
+|   |-- resume_builder.py
+|   |-- roadmap.py
+|   `-- ui.py
+|-- database/
+|-- generated/
+|-- logs/
+`-- assets/
 ```
 
 ## Installation
@@ -171,6 +174,9 @@ Suggested README embeds:
 - [Installation Guide](docs/INSTALLATION.md)
 - [User Guide](docs/USER_GUIDE.md)
 - [Deployment Guide](docs/DEPLOYMENT.md)
+- [User Manual](USER_MANUAL.md)
+- [Agents and Modules](AGENTS.md)
+- [Security Policy](SECURITY.md)
 
 ## Future Scope
 
