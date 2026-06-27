@@ -5,6 +5,7 @@ from __future__ import annotations
 import re
 from typing import Any
 
+from utils.ai import ai_json
 from utils.knowledge import (
     detect_resume_sections,
     extract_skills_from_text,
@@ -121,7 +122,7 @@ def analyze_resume_text(
     if word_count < 250:
         suggestions.append("Expand the resume with concise project responsibilities, tools used, and outcomes.")
 
-    return {
+    fallback = {
         "ats_score": ats_score,
         "strengths": strengths or ["Readable resume text was detected."],
         "weaknesses": weaknesses or ["No major ATS weakness detected for the selected target."],
@@ -129,4 +130,56 @@ def analyze_resume_text(
         "missing_keywords": missing_keywords,
         "suggestions": suggestions,
         "summary": _summary(text, career.title, ats_score, detected_skills, missing_skills),
+    }
+    if word_count < 40:
+        return fallback
+
+    prompt = json_prompt(
+        {
+            "resume_text": text[:8000],
+            "target_career": career.title,
+            "profile_skills": profile_skills,
+            "rule_based_analysis": fallback,
+            "required_output": {
+                "ats_score": "integer 0-100",
+                "strengths": "list of strings",
+                "weaknesses": "list of strings",
+                "missing_skills": "list of strings",
+                "missing_keywords": "list of strings",
+                "suggestions": "list of actionable strings",
+                "summary": "one concise paragraph",
+            },
+        }
+    )
+    result = ai_json(task="resume analysis", prompt=prompt, fallback=fallback, expected_type=dict)
+    return _valid_resume_analysis(result, fallback)
+
+
+def json_prompt(payload: dict[str, Any]) -> str:
+    """Serialize prompt payload consistently."""
+    import json
+
+    return json.dumps(payload, ensure_ascii=True)
+
+
+def _string_list(value: Any, fallback: list[str]) -> list[str]:
+    if not isinstance(value, list):
+        return fallback
+    cleaned = [str(item).strip() for item in value if str(item).strip()]
+    return cleaned or fallback
+
+
+def _valid_resume_analysis(result: dict[str, Any], fallback: dict[str, Any]) -> dict[str, Any]:
+    try:
+        score = int(result.get("ats_score", fallback["ats_score"]))
+    except (TypeError, ValueError):
+        score = int(fallback["ats_score"])
+    return {
+        "ats_score": max(0, min(100, score)),
+        "strengths": _string_list(result.get("strengths"), fallback["strengths"]),
+        "weaknesses": _string_list(result.get("weaknesses"), fallback["weaknesses"]),
+        "missing_skills": _string_list(result.get("missing_skills"), fallback["missing_skills"]),
+        "missing_keywords": _string_list(result.get("missing_keywords"), fallback["missing_keywords"]),
+        "suggestions": _string_list(result.get("suggestions"), fallback["suggestions"]),
+        "summary": str(result.get("summary") or fallback["summary"]).strip(),
     }

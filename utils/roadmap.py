@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+import json
+from typing import Any
+
+from utils.ai import ai_json
 from utils.knowledge import analyze_skill_gap, find_career, missing_skills_for_target
 
 
@@ -21,7 +25,7 @@ def generate_roadmaps(skills: list[str], target_career: str) -> dict[str, list[d
     third = focus[2] if len(focus) > 2 else career.required_skills[2]
     fourth = focus[3] if len(focus) > 3 else career.required_skills[3]
 
-    return {
+    fallback = {
         "30 Days": [
             {
                 "week": "Week 1",
@@ -93,6 +97,25 @@ def generate_roadmaps(skills: list[str], target_career: str) -> dict[str, list[d
             },
         ],
     }
+    prompt = json.dumps(
+        {
+            "skills": skills,
+            "target_career": career.title,
+            "skill_gaps": skill_gap_rows,
+            "rule_based_roadmap": fallback,
+            "required_output": {
+                "roadmap": {
+                    "30 Days": "list of weekly milestone objects",
+                    "60 Days": "list of weekly milestone objects",
+                    "90 Days": "list of weekly milestone objects",
+                },
+                "milestone_object": "week, goal, project, milestone, resources, skills",
+            },
+        },
+        ensure_ascii=True,
+    )
+    result = ai_json(task="learning roadmap", prompt=prompt, fallback={"roadmap": fallback}, expected_type=dict)
+    return _valid_roadmap(result.get("roadmap"), fallback)
 
 
 def calculate_progress(completed: dict[str, bool], roadmaps: dict[str, list[dict[str, object]]]) -> int:
@@ -102,3 +125,32 @@ def calculate_progress(completed: dict[str, bool], roadmaps: dict[str, list[dict
         return 0
     done = sum(1 for items in roadmaps.values() for item in items if completed.get(str(item["week"])))
     return round((done / total) * 100)
+
+
+def _valid_roadmap(value: Any, fallback: dict[str, list[dict[str, object]]]) -> dict[str, list[dict[str, object]]]:
+    if not isinstance(value, dict):
+        return fallback
+    valid: dict[str, list[dict[str, object]]] = {}
+    for period in ("30 Days", "60 Days", "90 Days"):
+        items = value.get(period)
+        if not isinstance(items, list):
+            valid[period] = fallback[period]
+            continue
+        valid_items = []
+        for item in items:
+            if not isinstance(item, dict):
+                continue
+            resources = item.get("resources", [])
+            skills = item.get("skills", [])
+            valid_items.append(
+                {
+                    "week": str(item.get("week", "Week")),
+                    "goal": str(item.get("goal", "Build role readiness.")),
+                    "project": str(item.get("project", "Portfolio project.")),
+                    "milestone": str(item.get("milestone", "Complete and document the work.")),
+                    "resources": [str(resource) for resource in resources] if isinstance(resources, list) else [str(resources)],
+                    "skills": [str(skill) for skill in skills] if isinstance(skills, list) else [str(skills)],
+                }
+            )
+        valid[period] = valid_items or fallback[period]
+    return valid

@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+import json
 import re
 from typing import Any
 
+from utils.ai import ai_json
 from utils.knowledge import find_career, missing_skills_for_target
 
 
@@ -14,7 +16,7 @@ def generate_questions(skills: list[str], target_career: str) -> dict[str, list[
     gaps = missing_skills_for_target(skills, career.title)
     focus_skill = gaps[0] if gaps else career.required_skills[0]
     second_skill = gaps[1] if len(gaps) > 1 else career.required_skills[1]
-    return {
+    fallback = {
         "HR Questions": [
             "Tell me about yourself and the direction you want your career to take.",
             f"Why are you interested in becoming a {career.title}?",
@@ -40,6 +42,25 @@ def generate_questions(skills: list[str], target_career: str) -> dict[str, list[
             f"Sketch pseudocode for a {career.title} project that uses {focus_skill}.",
         ],
     }
+    prompt = json.dumps(
+        {
+            "skills": skills,
+            "target_career": career.title,
+            "missing_skills": gaps,
+            "rule_based_questions": fallback,
+            "required_output": {
+                "questions": {
+                    "HR Questions": "list of strings",
+                    "Technical Questions": "list of strings",
+                    "Behavioral Questions": "list of strings",
+                    "Coding Questions": "list of strings",
+                }
+            },
+        },
+        ensure_ascii=True,
+    )
+    result = ai_json(task="interview questions", prompt=prompt, fallback={"questions": fallback}, expected_type=dict)
+    return _valid_questions(result.get("questions"), fallback)
 
 
 def evaluate_answer(answer: str, question: str = "", target_career: str = "") -> dict[str, Any]:
@@ -83,9 +104,58 @@ def evaluate_answer(answer: str, question: str = "", target_career: str = "") ->
     else:
         feedback = "Promising start; add structure, a concrete example, and a measurable outcome."
 
-    return {
+    fallback = {
         "score": score,
         "feedback": feedback,
         "suggestions": suggestions or ["Keep it concise, evidence-driven, and tailored to the question."],
         "question": question,
+    }
+    if word_count < 5:
+        return fallback
+    prompt = json.dumps(
+        {
+            "target_career": target_career,
+            "question": question,
+            "answer": clean[:5000],
+            "rule_based_feedback": fallback,
+            "required_output": {
+                "score": "integer 0-100",
+                "feedback": "one concise paragraph",
+                "suggestions": "list of strings",
+                "question": "same question string",
+            },
+        },
+        ensure_ascii=True,
+    )
+    result = ai_json(task="interview feedback", prompt=prompt, fallback=fallback, expected_type=dict)
+    return _valid_feedback(result, fallback)
+
+
+def _valid_questions(value: Any, fallback: dict[str, list[str]]) -> dict[str, list[str]]:
+    if not isinstance(value, dict):
+        return fallback
+    valid = {}
+    for category, defaults in fallback.items():
+        items = value.get(category, defaults)
+        if not isinstance(items, list):
+            valid[category] = defaults
+        else:
+            cleaned = [str(item).strip() for item in items if str(item).strip()]
+            valid[category] = cleaned or defaults
+    return valid
+
+
+def _valid_feedback(result: dict[str, Any], fallback: dict[str, Any]) -> dict[str, Any]:
+    try:
+        score = int(result.get("score", fallback["score"]))
+    except (TypeError, ValueError):
+        score = int(fallback["score"])
+    suggestions = result.get("suggestions", fallback["suggestions"])
+    if not isinstance(suggestions, list):
+        suggestions = fallback["suggestions"]
+    return {
+        "score": max(0, min(100, score)),
+        "feedback": str(result.get("feedback") or fallback["feedback"]),
+        "suggestions": [str(item).strip() for item in suggestions if str(item).strip()] or fallback["suggestions"],
+        "question": str(result.get("question") or fallback["question"]),
     }

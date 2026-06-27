@@ -6,6 +6,7 @@ import re
 from dataclasses import dataclass
 from typing import Any
 
+from utils.ai import ai_json
 
 @dataclass(frozen=True)
 class Career:
@@ -257,7 +258,34 @@ def recommend_careers(
                 "resources": list(career.resources),
             }
         )
-    return sorted(recommendations, key=lambda item: int(item["match"]), reverse=True)
+    fallback = sorted(recommendations, key=lambda item: int(item["match"]), reverse=True)
+    prompt = _json_prompt(
+        {
+            "profile_skills": skills,
+            "interests": interests,
+            "education": education,
+            "target_industry": industry,
+            "resume_excerpt": resume_text[:6000],
+            "resume_missing_skills": resume_missing_skills or [],
+            "available_careers": [
+                {
+                    "title": career.title,
+                    "industry": career.industry,
+                    "salary_range": career.salary_range,
+                    "growth": career.growth,
+                    "required_skills": list(career.required_skills),
+                    "resources": list(career.resources),
+                }
+                for career in CAREERS
+            ],
+            "rule_based_recommendations": fallback,
+            "required_output": {
+                "recommendations": "list of role objects with title, industry, match, salary_range, growth, required_skills, missing_skills, why, resources",
+            },
+        }
+    )
+    result = ai_json(task="career recommendation", prompt=prompt, fallback={"recommendations": fallback}, expected_type=dict)
+    return _valid_recommendations(result.get("recommendations"), fallback)
 
 
 def analyze_skill_gap(current_skills: list[str], target_career: str, resume_text: str = "") -> list[dict[str, Any]]:
@@ -289,4 +317,78 @@ def analyze_skill_gap(current_skills: list[str], target_career: str, resume_text
                 "Progress Weight": round(100 / total),
             }
         )
-    return rows
+    prompt = _json_prompt(
+        {
+            "current_skills": current_skills,
+            "target_career": career.title,
+            "resume_excerpt": resume_text[:6000],
+            "rule_based_gaps": rows,
+            "required_output": {
+                "gaps": "list with Missing Skill, Priority, Difficulty, Estimated Learning Time, Recommended Learning Path, Progress Weight",
+            },
+        }
+    )
+    result = ai_json(task="skill gap analysis", prompt=prompt, fallback={"gaps": rows}, expected_type=dict)
+    return _valid_gap_rows(result.get("gaps"), rows)
+
+
+def _json_prompt(payload: dict[str, Any]) -> str:
+    import json
+
+    return json.dumps(payload, ensure_ascii=True)
+
+
+def _valid_recommendations(value: Any, fallback: list[dict[str, object]]) -> list[dict[str, object]]:
+    if not isinstance(value, list):
+        return fallback
+    valid = []
+    fallback_by_title = {str(item["title"]).lower(): item for item in fallback}
+    for item in value:
+        if not isinstance(item, dict) or not item.get("title"):
+            continue
+        base = fallback_by_title.get(str(item["title"]).lower(), {})
+        try:
+            match = max(0, min(100, int(item.get("match", base.get("match", 50)))))
+        except (TypeError, ValueError):
+            match = int(base.get("match", 50))
+        valid.append(
+            {
+                "title": str(item.get("title", base.get("title", ""))),
+                "industry": str(item.get("industry", base.get("industry", ""))),
+                "match": match,
+                "salary_range": str(item.get("salary_range", base.get("salary_range", ""))),
+                "growth": str(item.get("growth", base.get("growth", ""))),
+                "required_skills": _as_list(item.get("required_skills"), list(base.get("required_skills", []))),
+                "missing_skills": _as_list(item.get("missing_skills"), list(base.get("missing_skills", []))),
+                "why": str(item.get("why", base.get("why", ""))),
+                "resources": _as_list(item.get("resources"), list(base.get("resources", []))),
+            }
+        )
+    return sorted(valid, key=lambda item: int(item["match"]), reverse=True) or fallback
+
+
+def _valid_gap_rows(value: Any, fallback: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    if not isinstance(value, list):
+        return fallback
+    valid = []
+    for item in value:
+        if not isinstance(item, dict) or not item.get("Missing Skill"):
+            continue
+        valid.append(
+            {
+                "Missing Skill": str(item.get("Missing Skill", "")),
+                "Priority": str(item.get("Priority", "Medium")),
+                "Difficulty": str(item.get("Difficulty", "Intermediate")),
+                "Estimated Learning Time": str(item.get("Estimated Learning Time", "2-4 weeks")),
+                "Recommended Learning Path": str(item.get("Recommended Learning Path", "Learn fundamentals, complete a guided lab, and build one portfolio task.")),
+                "Progress Weight": item.get("Progress Weight", 10),
+            }
+        )
+    return valid or fallback
+
+
+def _as_list(value: Any, fallback: list[str]) -> list[str]:
+    if not isinstance(value, list):
+        return fallback
+    cleaned = [str(item).strip() for item in value if str(item).strip()]
+    return cleaned or fallback
