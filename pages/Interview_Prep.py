@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import streamlit as st
 
-from utils.database import add_activity, initialize_database, load_profile, split_list
+from utils.database import add_activity, initialize_database, load_profile, save_interview_score, split_list
 from utils.interview import evaluate_answer, generate_questions
 from utils.ui import badge, bullet_list, inject_styles, page_header, panel, status_kind
 
@@ -40,6 +40,14 @@ with tabs[-1]:
             st.warning("Write an answer before evaluating.")
         else:
             result = evaluate_answer(answer, selected_question, target)
+            save_interview_score(
+                target_career=target,
+                question=selected_question,
+                answer=answer,
+                score=int(result["score"]),
+                feedback=str(result["feedback"]),
+                suggestions=result["suggestions"],
+            )
             add_activity("Mock interview evaluated", f"Score: {result['score']}%")
             c1, c2 = st.columns([1, 2])
             c1.metric("Score", f"{result['score']}%")

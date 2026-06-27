@@ -58,6 +58,7 @@ if st.button("Analyze Resume", use_container_width=True):
         save_resume_analysis(
             filename=uploaded.name if uploaded else "pasted-resume.txt",
             resume_text=resume_text,
+            target_career=target,
             **analysis,
         )
         st.success("Resume analysis saved.")

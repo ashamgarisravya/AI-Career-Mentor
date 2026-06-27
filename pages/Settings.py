@@ -51,8 +51,13 @@ with data_tab:
         c1, c2, c3, c4 = st.columns(4)
         c1.metric("Profiles", len(data["profiles"]))
         c2.metric("Resume Analyses", len(data["resume_analyses"]))
-        c3.metric("Activities", len(data["activities"]))
-        c4.metric("Settings", len(data["settings"]))
+        c3.metric("Recommendations", len(data["career_recommendations"]))
+        c4.metric("Interview Scores", len(data["interview_scores"]))
+        c5, c6, c7, c8 = st.columns(4)
+        c5.metric("Uploaded Resumes", len(data["uploaded_resumes"]))
+        c6.metric("ATS History", len(data["ats_history"]))
+        c7.metric("Roadmaps", len(data["roadmaps"]))
+        c8.metric("Activities", len(data["activities"]))
         st.download_button(
             "Download JSON Export",
             data=json.dumps(data, indent=2),

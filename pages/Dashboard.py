@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import pandas as pd
+import plotly.graph_objects as go
 import streamlit as st
 
 from utils.ats import analyze_resume_text
 from utils.charts import bar_progress, gauge
 from utils.database import (
+    dashboard_analytics,
     initialize_database,
     load_latest_resume_analysis,
     load_profile,
@@ -24,6 +26,7 @@ initialize_database()
 
 profile = load_profile()
 latest_resume = load_latest_resume_analysis()
+analytics = dashboard_analytics()
 
 if profile is None:
     page_header(
@@ -44,6 +47,12 @@ career_match = min(98, 35 + len(skills) * 10 + (15 if target else 0) + len(inter
 skill_gap = max(0, min(100, int((len(missing_skills) / max(len(skills) + len(missing_skills), 1)) * 100)))
 roadmap_progress = min(100, 20 + len(skills) * 8 + (15 if latest_resume else 0))
 interview_readiness = min(100, (career_match + resume_score + (100 - skill_gap)) // 3)
+if analytics["averages"]["avg_career_match"]:
+    career_match = int(analytics["averages"]["avg_career_match"])
+if analytics["averages"]["avg_learning_progress"]:
+    roadmap_progress = int(analytics["averages"]["avg_learning_progress"])
+if analytics["averages"]["avg_interview_score"]:
+    interview_readiness = int(analytics["averages"]["avg_interview_score"])
 resume_status = "Analyzed" if latest_resume else "Not analyzed"
 resume_status_kind = "success" if latest_resume else "warning"
 
@@ -72,7 +81,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-overview_tab, profile_tab, activity_tab = st.tabs(["Overview", "Profile", "Activity"])
+overview_tab, analytics_tab, profile_tab, activity_tab = st.tabs(["Overview", "Analytics", "Profile", "Activity"])
 
 with overview_tab:
     left_chart, right_chart = st.columns([1, 1.2])
@@ -101,6 +110,88 @@ with overview_tab:
             panel("Resume status")
             st.progress(resume_score / 100)
             st.write("Latest resume analysis is available." if latest_resume else "Analyze a resume to unlock ATS insights.")
+
+with analytics_tab:
+    counts = analytics["counts"]
+    c1, c2, c3, c4, c5 = st.columns(5)
+    c1.metric("Uploaded Resumes", counts["uploaded_resumes"])
+    c2.metric("ATS Runs", counts["ats_history"])
+    c3.metric("Recommendations", counts["career_recommendations"])
+    c4.metric("Roadmaps", counts["roadmaps"])
+    c5.metric("Interview Scores", counts["interview_scores"])
+
+    chart_left, chart_right = st.columns(2)
+    with chart_left:
+        with st.container(border=True):
+            panel("ATS history", "Saved resume analysis scores over time.")
+            ats_rows = analytics["ats_history"]
+            if ats_rows:
+                figure = go.Figure(
+                    go.Scatter(
+                        x=[row["created_at"] for row in ats_rows],
+                        y=[row["ats_score"] for row in ats_rows],
+                        mode="lines+markers",
+                        line={"color": "#2563eb"},
+                        marker={"size": 8},
+                    )
+                )
+                figure.update_yaxes(range=[0, 100], ticksuffix="%")
+                figure.update_layout(height=280, margin={"l": 20, "r": 20, "t": 20, "b": 20})
+                st.plotly_chart(figure, use_container_width=True)
+            else:
+                st.info("Analyze resumes to build ATS history.")
+    with chart_right:
+        with st.container(border=True):
+            panel("Interview score history", "Tracked mock interview feedback scores.")
+            interview_rows = analytics["interview_scores"]
+            if interview_rows:
+                figure = go.Figure(
+                    go.Bar(
+                        x=[row["created_at"] for row in interview_rows],
+                        y=[row["score"] for row in interview_rows],
+                        marker_color="#0f766e",
+                    )
+                )
+                figure.update_yaxes(range=[0, 100], ticksuffix="%")
+                figure.update_layout(height=280, margin={"l": 20, "r": 20, "t": 20, "b": 20})
+                st.plotly_chart(figure, use_container_width=True)
+            else:
+                st.info("Evaluate interview answers to build score history.")
+
+    lower_left, lower_right = st.columns(2)
+    with lower_left:
+        with st.container(border=True):
+            panel("Career recommendation runs", "Most recent top role recommendations.")
+            recommendation_rows = analytics["career_recommendations"]
+            if recommendation_rows:
+                figure = go.Figure(
+                    go.Bar(
+                        x=[row["top_match"] for row in recommendation_rows],
+                        y=[row["top_career"] for row in recommendation_rows],
+                        orientation="h",
+                        marker_color="#7c3aed",
+                    )
+                )
+                figure.update_xaxes(range=[0, 100], ticksuffix="%")
+                figure.update_layout(height=280, margin={"l": 20, "r": 20, "t": 20, "b": 20})
+                st.plotly_chart(figure, use_container_width=True)
+            else:
+                st.info("Generate recommendations to populate this chart.")
+    with lower_right:
+        with st.container(border=True):
+            panel("Database coverage", "Records tracked across the career mentor workflow.")
+            labels = ["Profiles", "Resumes", "ATS", "Careers", "Roadmaps", "Interviews"]
+            values = [
+                counts["profiles"],
+                counts["uploaded_resumes"],
+                counts["ats_history"],
+                counts["career_recommendations"],
+                counts["roadmaps"],
+                counts["interview_scores"],
+            ]
+            figure = go.Figure(go.Bar(x=labels, y=values, marker_color="#334155"))
+            figure.update_layout(height=280, margin={"l": 20, "r": 20, "t": 20, "b": 20})
+            st.plotly_chart(figure, use_container_width=True)
 
 with profile_tab:
     s1, s2 = st.columns([2, 1])

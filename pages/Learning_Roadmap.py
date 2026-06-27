@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import streamlit as st
 
-from utils.database import add_activity, initialize_database, load_profile, split_list
+from utils.database import add_activity, initialize_database, load_profile, save_roadmap, split_list
 from utils.roadmap import calculate_progress, generate_roadmaps
 from utils.ui import badge, bullet_list, inject_styles, page_header, panel, status_kind
 
@@ -23,10 +23,6 @@ target = st.text_input("Target Career", value=profile.target_career if profile e
 skills = split_list(profile.skills) if profile else []
 
 roadmaps = generate_roadmaps(skills, target)
-add = st.button("Refresh Roadmap", use_container_width=True)
-if add:
-    add_activity("Learning roadmap generated", f"Roadmap for {target}")
-
 completed = {}
 for period, items in roadmaps.items():
     for item in items:
@@ -34,6 +30,10 @@ for period, items in roadmaps.items():
         completed[str(item["week"])] = st.session_state.get(key, False)
 
 progress_percent = calculate_progress(completed, roadmaps)
+add = st.button("Refresh Roadmap", use_container_width=True)
+if add:
+    save_roadmap(target_career=target, skills=skills, roadmap=roadmaps, progress=progress_percent)
+    add_activity("Learning roadmap generated", f"Roadmap for {target}")
 c1, c2, c3 = st.columns(3)
 c1.metric("Learning Progress", f"{progress_percent}%")
 c2.metric("Target Career", target)

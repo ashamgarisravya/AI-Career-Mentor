@@ -10,6 +10,7 @@ from utils.database import (
     initialize_database,
     load_latest_resume_analysis,
     load_profile,
+    save_career_recommendations,
     split_list,
 )
 from utils.knowledge import recommend_careers
@@ -51,6 +52,13 @@ recommendations = recommend_careers(
 )
 
 if submitted:
+    save_career_recommendations(
+        skills=skills,
+        interests=interests,
+        education=education,
+        target_industry=industry,
+        recommendations=recommendations,
+    )
     add_activity("Career recommendations generated", f"Top role: {recommendations[0]['title']}")
 
 top = recommendations[0]
