@@ -3,14 +3,19 @@
 from __future__ import annotations
 
 import logging
+import os
 import re
 from pathlib import Path
 from typing import Any
 
+from dotenv import load_dotenv
 
-LOG_PATH = Path("logs") / "app.log"
+
+load_dotenv()
+
+LOG_PATH = Path(os.getenv("LOG_PATH", "logs/app.log"))
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
-MAX_PDF_BYTES = 8 * 1024 * 1024
+MAX_PDF_BYTES = int(os.getenv("MAX_PDF_UPLOAD_MB", "8")) * 1024 * 1024
 
 
 def get_logger(name: str) -> logging.Logger:
