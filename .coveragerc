@@ -1,0 +1,15 @@
+[run]
+branch = True
+include =
+    utils/ai.py
+    utils/ats.py
+    utils/database.py
+    utils/knowledge.py
+omit =
+    tests/*
+
+[report]
+show_missing = True
+skip_empty = True
+fail_under = 80
+precision = 2

@@ -178,9 +178,17 @@ Run formatting and repository automation checks:
 
 ```bash
 python -m black --check app.py pages utils tests
-python -m pytest --cov=utils --cov=pages --cov=app --cov-report=term-missing --cov-report=xml
+python -m pytest
 python -m pip_audit --disable-pip --no-deps --cache-dir .pip-audit-cache --ignore-vuln PYSEC-2026-212 --ignore-vuln CVE-2026-33682 -r requirements.txt -r requirements-dev.txt
 python -m pre_commit run --all-files
+```
+
+Pytest is configured in `pytest.ini`, and coverage.py is configured in `.coveragerc` with an 80% fail-under threshold for the tested business modules. The default `python -m pytest` command prints missing coverage lines and writes `coverage.xml`.
+
+Run the optional Streamlit page smoke test when you want runtime page coverage:
+
+```bash
+python -m pytest -m "integration" --no-cov
 ```
 
 The repository also includes GitHub Actions workflows for Ruff, Mypy, Bandit, pip-audit, Gitleaks secret scanning, test coverage artifact upload, and changelog generation from tags using git-cliff.

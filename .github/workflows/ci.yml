@@ -55,7 +55,7 @@ jobs:
           GITLEAKS_CONFIG: .gitleaks.toml
 
       - name: Run tests with coverage
-        run: python -m pytest --cov=utils --cov=pages --cov=app --cov-report=term-missing --cov-report=xml
+        run: python -m pytest
 
       - name: Upload coverage
         uses: actions/upload-artifact@v4

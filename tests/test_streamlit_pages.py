@@ -1,8 +1,10 @@
 from pathlib import Path
 
+import pytest
 from streamlit.testing.v1 import AppTest
 
 
+@pytest.mark.integration
 def test_streamlit_pages_load_without_exceptions() -> None:
     files = [Path("app.py"), *sorted(Path("pages").glob("*.py"))]
     failures: list[str] = []

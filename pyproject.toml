@@ -105,28 +105,6 @@ max-line-length = 100
 exclude_dirs = [".venv", "venv", "env", "database", "generated", "logs"]
 skips = ["B101", "B110", "B310"]
 
-[tool.pytest.ini_options]
-testpaths = ["tests"]
-addopts = "--strict-markers --strict-config"
-filterwarnings = [
-  "ignore:unclosed database.*:ResourceWarning",
-  "ignore:PyPDF2 is deprecated.*:DeprecationWarning",
-]
-
-[tool.coverage.run]
-branch = true
-source = ["app", "pages", "utils"]
-omit = [
-  ".venv/*",
-  "venv/*",
-  "env/*",
-  "tests/*",
-]
-
-[tool.coverage.report]
-show_missing = true
-skip_empty = true
-
 [tool.pip-audit]
 requirement = ["requirements.txt", "requirements-dev.txt"]
 disable-pip = true
