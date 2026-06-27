@@ -5,6 +5,7 @@ from __future__ import annotations
 import streamlit as st
 
 from utils.database import initialize_database
+from utils.ui import inject_styles, page_header
 
 
 APP_TITLE = "AI Career Mentor"
@@ -33,6 +34,7 @@ def configure_page() -> None:
 def render_sidebar() -> None:
     """Render application navigation."""
     with st.sidebar:
+        inject_styles()
         st.title(APP_TITLE)
         st.caption("Career planning, resumes, roadmaps, and interview prep")
         st.divider()
@@ -68,14 +70,24 @@ def main() -> None:
     """Render the home page."""
     initialize_database()
     configure_page()
+    inject_styles()
     render_sidebar()
-    st.title(APP_TITLE)
-    st.subheader("Your all-in-one career planning workspace")
-    st.write(
-        "Use the sidebar to manage your profile, analyze resumes, discover careers, "
-        "close skill gaps, build a roadmap, practice interviews, and generate a PDF resume."
+    page_header(
+        APP_TITLE,
+        "A professional workspace for resume scoring, career fit, learning plans, and interview readiness.",
+        [("Resume intelligence", "info"), ("Career planning", "success"), ("Interview prep", "warning")],
     )
-    st.page_link("pages/Dashboard.py", label="Go to Dashboard")
+    left, middle, right = st.columns(3)
+    left.metric("Workflow", "9 pages")
+    middle.metric("Data store", "Local SQLite")
+    right.metric("Mode", "Private")
+    with st.container(border=True):
+        st.subheader("Command center")
+        st.write(
+            "Use the sidebar to manage your profile, analyze resumes, discover careers, "
+            "close skill gaps, build a roadmap, practice interviews, and generate a PDF resume."
+        )
+        st.page_link("pages/Dashboard.py", label="Open Dashboard")
 
 
 if __name__ == "__main__":

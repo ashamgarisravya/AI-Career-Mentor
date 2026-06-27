@@ -5,17 +5,25 @@ from __future__ import annotations
 import streamlit as st
 
 from utils.database import initialize_database, load_profile, save_profile, split_list
+from utils.ui import badge, inject_styles, page_header, panel
 
 
 st.set_page_config(page_title="Profile | AI Career Mentor", layout="wide")
+inject_styles()
 initialize_database()
 profile = load_profile()
 
-st.title("Profile")
-st.caption("Save the learner information used by recommendations, dashboard metrics, and roadmaps.")
+page_header(
+    "Profile",
+    "Keep learner context current so recommendations, resume scoring, and roadmaps stay personalized.",
+    [("Personalization", "info"), ("Local data", "success")],
+)
 
-with st.container(border=True):
-    st.subheader("Learner profile")
+form_tab, saved_tab = st.tabs(["Profile Form", "Saved Snapshot"])
+
+with form_tab:
+    with st.container(border=True):
+        panel("Learner profile", "Core academic, skill, and career details used across the product.")
     with st.form("profile_form", clear_on_submit=False):
         left, right = st.columns(2)
         with left:
@@ -57,20 +65,35 @@ with st.container(border=True):
                 st.success("Profile saved successfully.")
                 st.rerun()
 
-if profile:
-    st.subheader("Saved profile")
-    c1, c2, c3, c4 = st.columns(4)
-    c1.metric("Name", profile.name or "Not set")
-    c2.metric("Target Career", profile.target_career or "Not set")
-    c3.metric("Skills", len(split_list(profile.skills)))
-    c4.metric("Experience", profile.experience_level or "Not set")
-    with st.container(border=True):
-        st.write(f"**Email:** {profile.email or 'Not set'}")
-        st.write(f"**College:** {profile.college or 'Not set'}")
-        st.write(f"**Degree / Branch:** {profile.degree or 'Not set'} / {profile.branch or 'Not set'}")
-        st.write(f"**Graduation Year:** {profile.graduation_year or 'Not set'}")
-        st.write(f"**Skills:** {profile.skills or 'Not set'}")
-        st.write(f"**Interests:** {profile.interests or 'Not set'}")
-        st.caption(f"Last updated: {profile.updated_at}")
-else:
-    st.info("No saved profile yet. Complete the form to personalize the application.")
+with saved_tab:
+    if profile:
+        c1, c2, c3, c4 = st.columns(4)
+        c1.metric("Name", profile.name or "Not set")
+        c2.metric("Target Career", profile.target_career or "Not set")
+        c3.metric("Skills", len(split_list(profile.skills)))
+        c4.metric("Experience", profile.experience_level or "Not set")
+        st.markdown(
+            " ".join(
+                [
+                    badge(profile.experience_level or "Experience not set", "info"),
+                    badge(f"{len(split_list(profile.interests))} interests", "success"),
+                    badge(f"Updated {profile.updated_at}", "warning"),
+                ]
+            ),
+            unsafe_allow_html=True,
+        )
+        left, right = st.columns([1.2, 1])
+        with left:
+            with st.container(border=True):
+                panel("Academic profile")
+                st.write(f"**Email:** {profile.email or 'Not set'}")
+                st.write(f"**College:** {profile.college or 'Not set'}")
+                st.write(f"**Degree / Branch:** {profile.degree or 'Not set'} / {profile.branch or 'Not set'}")
+                st.write(f"**Graduation Year:** {profile.graduation_year or 'Not set'}")
+        with right:
+            with st.container(border=True):
+                panel("Career signals")
+                st.write(f"**Skills:** {profile.skills or 'Not set'}")
+                st.write(f"**Interests:** {profile.interests or 'Not set'}")
+    else:
+        st.info("No saved profile yet. Complete the form to personalize the application.")

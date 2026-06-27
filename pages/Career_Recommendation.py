@@ -13,16 +13,23 @@ from utils.database import (
     split_list,
 )
 from utils.knowledge import recommend_careers
+from utils.ui import badge, bullet_list, inject_styles, page_header, panel, status_kind
 
 
 st.set_page_config(page_title="Career Recommendation | AI Career Mentor", layout="wide")
+inject_styles()
 initialize_database()
 profile = load_profile()
 resume = load_latest_resume_analysis()
 
-st.title("Career Recommendation")
+page_header(
+    "Career Recommendation",
+    "Compare profile and resume signals against high-fit career paths with salary, growth, and learning resources.",
+    [("Profile aware", "info"), ("Resume aware", "success" if resume else "warning")],
+)
 
 with st.form("career_form"):
+    panel("Recommendation inputs", "Tune skills, interests, education, and target industry without changing saved profile data.")
     c1, c2 = st.columns(2)
     with c1:
         skills_text = st.text_area("Skills", value=profile.skills if profile else "")
@@ -46,33 +53,57 @@ recommendations = recommend_careers(
 if submitted:
     add_activity("Career recommendations generated", f"Top role: {recommendations[0]['title']}")
 
-st.subheader("Top career matches")
-st.dataframe(
-    pd.DataFrame(
+top = recommendations[0]
+c1, c2, c3 = st.columns(3)
+c1.metric("Top Match", str(top["title"]))
+c2.metric("Match Score", f"{top['match']}%")
+c3.metric("Tracked Roles", len(recommendations))
+st.markdown(
+    " ".join(
         [
-            {
-                "Career": item["title"],
-                "Match": f"{item['match']}%",
-                "Salary": item["salary_range"],
-                "Growth": item["growth"],
-                "Industry": item["industry"],
-            }
-            for item in recommendations
+            badge(f"{top['match']}% match", status_kind(int(top["match"]))),
+            badge(str(top["industry"]), "info"),
+            badge(str(top["growth"]).split()[0] + " growth", "success"),
         ]
     ),
-    use_container_width=True,
-    hide_index=True,
+    unsafe_allow_html=True,
 )
 
-for item in recommendations[:3]:
+table_tab, detail_tab = st.tabs(["Compare Roles", "Role Details"])
+with table_tab:
     with st.container(border=True):
-        st.subheader(f"{item['title']} - {item['match']}% match")
-        st.write(f"**Expected Salary:** {item['salary_range']}")
-        st.write(f"**Growth:** {item['growth']}")
-        st.write(f"**Required Skills:** {', '.join(item['required_skills'])}")
-        if item["missing_skills"]:
-            st.write(f"**Skills to Build:** {', '.join(item['missing_skills'])}")
-        st.write(f"**Why Recommended:** {item['why']}")
-        st.write("**Learning Resources:**")
-        for resource in item["resources"]:
-            st.write(f"- {resource}")
+        panel("Top career matches")
+        st.dataframe(
+            pd.DataFrame(
+                [
+                    {
+                        "Career": item["title"],
+                        "Match": f"{item['match']}%",
+                        "Salary": item["salary_range"],
+                        "Growth": item["growth"],
+                        "Industry": item["industry"],
+                    }
+                    for item in recommendations
+                ]
+            ),
+            use_container_width=True,
+            hide_index=True,
+        )
+
+with detail_tab:
+    for item in recommendations[:3]:
+        with st.expander(f"{item['title']} - {item['match']}% match", expanded=item is recommendations[0]):
+            left, right = st.columns([1.2, 1])
+            with left:
+                st.write(f"**Expected Salary:** {item['salary_range']}")
+                st.write(f"**Growth:** {item['growth']}")
+                st.write(f"**Why Recommended:** {item['why']}")
+                st.progress(int(item["match"]) / 100)
+            with right:
+                st.write("**Required Skills**")
+                bullet_list(item["required_skills"])
+                if item["missing_skills"]:
+                    st.write("**Skills to Build**")
+                    bullet_list(item["missing_skills"])
+            st.write("**Learning Resources**")
+            bullet_list(item["resources"])

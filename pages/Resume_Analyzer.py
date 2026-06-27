@@ -14,18 +14,31 @@ from utils.database import (
     split_list,
 )
 from utils.pdf_parser import extract_pdf_text
+from utils.ui import badge, bullet_list, inject_styles, page_header, panel, status_kind
 
 
 st.set_page_config(page_title="Resume Analyzer | AI Career Mentor", layout="wide")
+inject_styles()
 initialize_database()
 profile = load_profile()
 
-st.title("Resume Analyzer")
+page_header(
+    "Resume Analyzer",
+    "Upload a resume or paste text to generate ATS score, strengths, gaps, and next actions.",
+    [("PDF upload", "info"), ("ATS scoring", "success"), ("Private analysis", "warning")],
+)
 st.caption(ai_status_message())
 
-uploaded = st.file_uploader("Upload resume PDF", type=["pdf"])
-resume_text = st.text_area("Or paste resume text", height=220)
-target = st.text_input("Target Career", value=profile.target_career if profile else "AI Engineer")
+input_col, target_col = st.columns([1.4, 1])
+with input_col:
+    with st.container(border=True):
+        panel("Resume input", "Upload a PDF or paste resume text directly.")
+        uploaded = st.file_uploader("Upload resume PDF", type=["pdf"])
+        resume_text = st.text_area("Or paste resume text", height=220)
+with target_col:
+    with st.container(border=True):
+        panel("Target role", "The ATS score is calibrated to this role.")
+        target = st.text_input("Target Career", value=profile.target_career if profile else "AI Engineer")
 
 if uploaded:
     extracted = extract_pdf_text(uploaded.getvalue())
@@ -57,21 +70,42 @@ if latest:
     c1.metric("ATS Score", f"{latest['ats_score']}%")
     c2.metric("Missing Skills", len(latest["missing_skills"]))
     c3.metric("Missing Keywords", len(latest["missing_keywords"]))
+    st.markdown(
+        " ".join(
+            [
+                badge(f"ATS {latest['ats_score']}%", status_kind(int(latest["ats_score"]))),
+                badge(f"{len(latest['strengths'])} strengths", "success"),
+                badge(f"{len(latest['suggestions'])} suggestions", "info"),
+            ]
+        ),
+        unsafe_allow_html=True,
+    )
     st.progress(int(latest["ats_score"]) / 100)
-    sections = [
-        ("Strengths", latest["strengths"]),
-        ("Weaknesses", latest["weaknesses"]),
-        ("Missing Skills", latest["missing_skills"]),
-        ("Missing Keywords", latest["missing_keywords"]),
-        ("Suggested Improvements", latest["suggestions"]),
-    ]
-    for title, items in sections:
+    summary_tab, gaps_tab, actions_tab = st.tabs(["Summary", "Gaps", "Actions"])
+    with summary_tab:
         with st.container(border=True):
-            st.subheader(title)
-            for item in items:
-                st.write(f"- {item}")
-    with st.container(border=True):
-        st.subheader("Resume Summary")
-        st.write(latest["summary"])
+            panel("Resume Summary")
+            st.write(latest["summary"])
+        left, right = st.columns(2)
+        with left:
+            with st.expander("Strengths", expanded=True):
+                bullet_list(latest["strengths"])
+        with right:
+            with st.expander("Weaknesses", expanded=True):
+                bullet_list(latest["weaknesses"])
+    with gaps_tab:
+        left, right = st.columns(2)
+        with left:
+            with st.container(border=True):
+                panel("Missing Skills")
+                bullet_list(latest["missing_skills"] or ["No major skill gaps detected."])
+        with right:
+            with st.container(border=True):
+                panel("Missing Keywords")
+                bullet_list(latest["missing_keywords"] or ["No major keyword gaps detected."])
+    with actions_tab:
+        with st.container(border=True):
+            panel("Actionable suggestions")
+            bullet_list(latest["suggestions"])
 else:
     st.info("No resume analysis has been saved yet.")

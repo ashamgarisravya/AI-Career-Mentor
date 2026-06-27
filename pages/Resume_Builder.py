@@ -6,16 +6,22 @@ import streamlit as st
 
 from utils.database import add_activity, initialize_database, load_profile
 from utils.resume_builder import build_resume_pdf
+from utils.ui import badge, inject_styles, page_header, panel
 
 
 st.set_page_config(page_title="Resume Builder | AI Career Mentor", layout="wide")
+inject_styles()
 initialize_database()
 profile = load_profile()
 
-st.title("Resume Builder")
-st.caption("Create a clean professional resume PDF.")
+page_header(
+    "Resume Builder",
+    "Create a clean professional resume PDF from profile, education, project, and experience details.",
+    [("PDF export", "success"), ("Profile assisted", "info")],
+)
 
 with st.form("resume_builder"):
+    panel("Resume content", "Fill each section once, then generate a downloadable PDF.")
     c1, c2 = st.columns(2)
     with c1:
         name = st.text_input("Full Name", value=profile.name if profile else "")
@@ -44,12 +50,21 @@ if submitted:
     )
     add_activity("Resume PDF generated", f"Generated resume for {name or 'learner'}")
     st.success("Resume PDF generated.")
-    st.download_button(
-        "Download Resume PDF",
-        data=pdf_bytes,
-        file_name="ai_career_mentor_resume.pdf",
-        mime="application/pdf",
-        use_container_width=True,
-    )
+    c1, c2, c3 = st.columns(3)
+    c1.metric("Sections", 7)
+    c2.metric("Format", "PDF")
+    c3.metric("Status", "Ready")
+    st.markdown(badge("Download ready", "success"), unsafe_allow_html=True)
+    with st.container(border=True):
+        panel("Export")
+        st.download_button(
+            "Download Resume PDF",
+            data=pdf_bytes,
+            file_name="ai_career_mentor_resume.pdf",
+            mime="application/pdf",
+            use_container_width=True,
+        )
 else:
-    st.info("Fill the form and generate a downloadable professional PDF.")
+    with st.container(border=True):
+        panel("Resume builder status")
+        st.info("Fill the form and generate a downloadable professional PDF.")
