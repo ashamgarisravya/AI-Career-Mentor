@@ -5,79 +5,128 @@ from __future__ import annotations
 import re
 from typing import Any
 
-from utils.knowledge import find_career, missing_skills_for_target, normalize
+from utils.knowledge import (
+    detect_resume_sections,
+    extract_skills_from_text,
+    find_career,
+    missing_skills_for_target,
+    required_keywords_for_career,
+    text_has_skill,
+)
 
 
-ACTION_WORDS = ("built", "created", "developed", "led", "improved", "deployed", "analyzed")
-BASE_KEYWORDS = ("education", "skills", "project", "experience", "certification", "email")
+ACTION_WORDS = (
+    "achieved",
+    "analyzed",
+    "automated",
+    "built",
+    "created",
+    "deployed",
+    "designed",
+    "developed",
+    "improved",
+    "implemented",
+    "led",
+    "optimized",
+    "reduced",
+    "shipped",
+)
+CONTACT_RE = re.compile(r"[\w.+-]+@[\w-]+\.[\w.-]+")
+METRIC_RE = re.compile(r"\b\d+(?:\.\d+)?\s*(?:%|x|k|m|users|hours|days|projects|models|apis|dashboards)\b", re.I)
+
+
+def _sentences(text: str) -> list[str]:
+    return [part.strip() for part in re.split(r"(?<=[.!?])\s+|\n+", text) if part.strip()]
+
+
+def _summary(text: str, career_title: str, score: int, detected: list[str], missing: list[str]) -> str:
+    sentences = _sentences(text)
+    lead = sentences[0][:220] if sentences else "The resume has limited readable text."
+    return (
+        f"{lead} Overall, it scores {score}% for {career_title}. "
+        f"Detected role signals include {', '.join(detected[:5]) if detected else 'no strong target skills yet'}, "
+        f"with {len(missing)} important skill gap(s) to close."
+    )
 
 
 def analyze_resume_text(
     resume_text: str, target_career: str, profile_skills: list[str] | None = None
 ) -> dict[str, Any]:
-    """Analyze resume text using deterministic, explainable rules."""
+    """Analyze resume text using deterministic, explainable ATS rules."""
     profile_skills = profile_skills or []
     text = resume_text.strip()
     lowered = text.lower()
+    words = re.findall(r"[a-zA-Z][a-zA-Z+#.-]+", text)
+    word_count = len(words)
     career = find_career(target_career)
-    detected_skills = [
-        skill for skill in career.required_skills if skill.lower() in lowered
+    sections = detect_resume_sections(text)
+    detected_skills = extract_skills_from_text(text)
+    profile_and_resume = sorted(set(detected_skills + profile_skills))
+    missing_skills = missing_skills_for_target(profile_and_resume, career.title)
+    role_keywords = required_keywords_for_career(career)
+    missing_keywords = [
+        keyword
+        for keyword in role_keywords
+        if not text_has_skill(text, keyword) and keyword.lower() not in lowered
     ]
-    combined_skills = sorted(set(detected_skills + profile_skills))
-    missing_skills = missing_skills_for_target(combined_skills, career.title)
-    missing_keywords = [keyword for keyword in BASE_KEYWORDS if keyword not in lowered]
 
-    has_email = bool(re.search(r"[\w.+-]+@[\w-]+\.[\w.-]+", text))
-    has_metrics = bool(re.search(r"\b\d+%|\b\d+\+|\b\d+x\b", lowered))
-    has_projects = "project" in lowered or any(word in lowered for word in ACTION_WORDS)
-    score = 25
-    score += 10 if has_email else 0
-    score += 15 if "education" in lowered else 0
-    score += 20 if has_projects else 0
-    score += 15 if has_metrics else 0
-    score += min(25, len(detected_skills) * 5)
-    ats_score = max(20, min(98, score))
+    has_email = bool(CONTACT_RE.search(text))
+    has_metrics = bool(METRIC_RE.search(text))
+    action_hits = sorted({word for word in ACTION_WORDS if re.search(rf"\b{word}\b", lowered)})
+    section_score = sum(1 for present in sections.values() if present) * 5
+    skill_score = min(28, sum(1 for skill in career.required_skills if skill in detected_skills) * 5)
+    keyword_score = min(16, (len(role_keywords) - len(missing_keywords)) * 2)
+    length_score = 12 if 250 <= word_count <= 900 else 8 if word_count >= 120 else 3
+    contact_score = 8 if has_email else 0
+    impact_score = 12 if has_metrics else 4 if action_hits else 0
+    action_score = min(12, len(action_hits) * 3)
+    ats_score = max(10, min(100, section_score + skill_score + keyword_score + length_score + contact_score + impact_score + action_score))
 
     strengths = []
     if has_email:
-        strengths.append("Contact information is visible.")
-    if has_projects:
-        strengths.append("Project or action-oriented experience is present.")
+        strengths.append("Contact email is visible for recruiter follow-up.")
+    if sections["skills"]:
+        strengths.append("Skills section is easy for ATS parsing.")
+    if sections["projects"] or sections["experience"]:
+        strengths.append("Project or experience evidence is present.")
     if has_metrics:
-        strengths.append("Measurable impact is included.")
+        strengths.append("Resume includes measurable impact, which strengthens ranking.")
+    if action_hits:
+        strengths.append(f"Uses action verbs such as {', '.join(action_hits[:5])}.")
     if detected_skills:
-        strengths.append(f"Relevant skills found: {', '.join(detected_skills[:5])}.")
+        strengths.append(f"Relevant technical signals found: {', '.join(detected_skills[:6])}.")
 
     weaknesses = []
     if not has_email:
-        weaknesses.append("Add professional email/contact details.")
-    if not has_projects:
-        weaknesses.append("Add project work with tools, outcomes, and responsibilities.")
+        weaknesses.append("Missing clear email/contact information.")
+    if word_count < 120:
+        weaknesses.append("Resume text is too short for strong ATS matching.")
+    for section, present in sections.items():
+        if not present and section in {"skills", "projects", "experience", "education"}:
+            weaknesses.append(f"Missing or unclear {section} section.")
     if not has_metrics:
-        weaknesses.append("Add numbers such as accuracy, users, time saved, or impact.")
+        weaknesses.append("Achievements need measurable outcomes such as accuracy, users, time saved, or revenue impact.")
     if missing_skills:
-        weaknesses.append(f"Missing target skills: {', '.join(missing_skills[:4])}.")
+        weaknesses.append(f"Missing target skills for {career.title}: {', '.join(missing_skills[:5])}.")
 
     suggestions = [
-        "Use clear section headings: Summary, Skills, Projects, Education, Experience.",
-        "Rewrite bullets with action verb + tool + measurable result.",
-        f"Add evidence for {career.title} skills through projects or coursework.",
+        "Use standard headings: Summary, Skills, Experience, Projects, Education, Certifications.",
+        "Rewrite bullets as action verb + tool/skill + business or technical outcome.",
+        f"Add a targeted {career.title} project that demonstrates {', '.join((missing_skills or list(career.required_skills))[:2])}.",
     ]
-    if missing_skills:
-        suggestions.append(f"Prioritize adding {missing_skills[0]} to your next project.")
-
-    summary = (
-        f"This resume is currently scoring {ats_score}% for {career.title}. "
-        f"It has {len(detected_skills)} target-skill signals and "
-        f"{len(missing_skills)} notable skill gaps."
-    )
+    if missing_keywords:
+        suggestions.append(f"Add role keywords naturally: {', '.join(missing_keywords[:6])}.")
+    if not has_metrics:
+        suggestions.append("Add at least three quantified bullets, for example accuracy improved, time reduced, or users served.")
+    if word_count < 250:
+        suggestions.append("Expand the resume with concise project responsibilities, tools used, and outcomes.")
 
     return {
         "ats_score": ats_score,
-        "strengths": strengths or ["Resume content was detected and can be improved."],
-        "weaknesses": weaknesses or ["No major structural weakness detected."],
+        "strengths": strengths or ["Readable resume text was detected."],
+        "weaknesses": weaknesses or ["No major ATS weakness detected for the selected target."],
         "missing_skills": missing_skills,
         "missing_keywords": missing_keywords,
         "suggestions": suggestions,
-        "summary": summary,
+        "summary": _summary(text, career.title, ats_score, detected_skills, missing_skills),
     }

@@ -30,7 +30,7 @@ with tabs[-1]:
         if not answer.strip():
             st.warning("Write an answer before evaluating.")
         else:
-            result = evaluate_answer(answer)
+            result = evaluate_answer(answer, selected_question, target)
             add_activity("Mock interview evaluated", f"Score: {result['score']}%")
             st.metric("Score", f"{result['score']}%")
             st.write(result["feedback"])
