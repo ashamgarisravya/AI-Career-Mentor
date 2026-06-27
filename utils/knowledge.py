@@ -8,6 +8,7 @@ from typing import Any
 
 from utils.ai import ai_json
 
+
 @dataclass(frozen=True)
 class Career:
     title: str

@@ -11,7 +11,6 @@ from typing import Any
 
 from dotenv import load_dotenv
 
-
 load_dotenv()
 
 DATABASE_PATH = Path(os.getenv("DATABASE_PATH", "database/app.db"))

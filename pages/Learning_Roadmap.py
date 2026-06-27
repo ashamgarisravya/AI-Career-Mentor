@@ -7,10 +7,9 @@ import sqlite3
 import streamlit as st
 
 from utils.database import add_activity, initialize_database, load_profile, save_roadmap, split_list
-from utils.roadmap import calculate_progress, generate_roadmaps
 from utils.production import get_logger
+from utils.roadmap import calculate_progress, generate_roadmaps
 from utils.ui import badge, bullet_list, inject_styles, page_header, panel, status_kind
-
 
 st.set_page_config(page_title="Learning Roadmap | AI Career Mentor", layout="wide")
 inject_styles()

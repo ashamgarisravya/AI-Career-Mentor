@@ -6,7 +6,6 @@ import re
 from io import BytesIO
 from typing import Any
 
-
 REQUIRED_FIELDS = ("name", "email", "education", "skills")
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 

@@ -15,7 +15,6 @@ from utils.knowledge import (
     text_has_skill,
 )
 
-
 ACTION_WORDS = (
     "achieved",
     "analyzed",

@@ -19,7 +19,6 @@ from utils.pdf_parser import extract_pdf_text
 from utils.production import get_logger, validate_pdf_upload, validate_required
 from utils.ui import badge, bullet_list, empty_state, inject_styles, page_header, panel, status_kind
 
-
 st.set_page_config(page_title="Resume Analyzer | AI Career Mentor", layout="wide")
 inject_styles()
 initialize_database()
@@ -34,11 +33,10 @@ page_header(
 st.caption(ai_status_message())
 
 input_col, target_col = st.columns([1.4, 1])
-with input_col:
-    with st.container(border=True):
-        panel("Resume input", "Upload a PDF or paste resume text directly.")
-        uploaded = st.file_uploader("Upload resume PDF", type=["pdf"])
-        resume_text = st.text_area("Or paste resume text", height=220)
+with input_col, st.container(border=True):
+    panel("Resume input", "Upload a PDF or paste resume text directly.")
+    uploaded = st.file_uploader("Upload resume PDF", type=["pdf"])
+    resume_text = st.text_area("Or paste resume text", height=220)
 with target_col:
     with st.container(border=True):
         panel("Target role", "The ATS score is calibrated to this role.")
@@ -108,25 +106,20 @@ if latest:
             panel("Resume Summary")
             st.write(latest["summary"])
         left, right = st.columns(2)
-        with left:
-            with st.expander("Strengths", expanded=True):
-                bullet_list(latest["strengths"])
-        with right:
-            with st.expander("Weaknesses", expanded=True):
-                bullet_list(latest["weaknesses"])
+        with left, st.expander("Strengths", expanded=True):
+            bullet_list(latest["strengths"])
+        with right, st.expander("Weaknesses", expanded=True):
+            bullet_list(latest["weaknesses"])
     with gaps_tab:
         left, right = st.columns(2)
-        with left:
-            with st.container(border=True):
-                panel("Missing Skills")
-                bullet_list(latest["missing_skills"] or ["No major skill gaps detected."])
-        with right:
-            with st.container(border=True):
-                panel("Missing Keywords")
-                bullet_list(latest["missing_keywords"] or ["No major keyword gaps detected."])
-    with actions_tab:
-        with st.container(border=True):
-            panel("Actionable suggestions")
-            bullet_list(latest["suggestions"])
+        with left, st.container(border=True):
+            panel("Missing Skills")
+            bullet_list(latest["missing_skills"] or ["No major skill gaps detected."])
+        with right, st.container(border=True):
+            panel("Missing Keywords")
+            bullet_list(latest["missing_keywords"] or ["No major keyword gaps detected."])
+    with actions_tab, st.container(border=True):
+        panel("Actionable suggestions")
+        bullet_list(latest["suggestions"])
 else:
     empty_state("No resume analysis yet", "Upload a PDF or paste resume text to create the first ATS report.")

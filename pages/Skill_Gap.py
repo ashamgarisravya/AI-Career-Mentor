@@ -5,10 +5,14 @@ from __future__ import annotations
 import pandas as pd
 import streamlit as st
 
-from utils.database import initialize_database, load_latest_resume_analysis, load_profile, split_list
+from utils.database import (
+    initialize_database,
+    load_latest_resume_analysis,
+    load_profile,
+    split_list,
+)
 from utils.knowledge import analyze_skill_gap, extract_skills_from_text, find_career, merge_skills
 from utils.ui import badge, bullet_list, inject_styles, page_header, panel
-
 
 st.set_page_config(page_title="Skill Gap Analysis | AI Career Mentor", layout="wide")
 inject_styles()
@@ -45,10 +49,9 @@ else:
         unsafe_allow_html=True,
     )
     overview_tab, path_tab = st.tabs(["Gap Matrix", "Learning Paths"])
-    with overview_tab:
-        with st.container(border=True):
-            panel("Skill gap matrix")
-            st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
+    with overview_tab, st.container(border=True):
+        panel("Skill gap matrix")
+        st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
     with path_tab:
         for row in rows:
             with st.expander(f"{row['Missing Skill']} - {row['Priority']} priority", expanded=row["Priority"] == "High"):

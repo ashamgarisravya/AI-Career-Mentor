@@ -10,7 +10,6 @@ from utils.database import initialize_database, load_profile, save_profile, spli
 from utils.production import get_logger, validate_email, validate_required
 from utils.ui import badge, empty_state, inject_styles, page_header, panel
 
-
 st.set_page_config(page_title="Profile | AI Career Mentor", layout="wide")
 inject_styles()
 initialize_database()
@@ -106,10 +105,9 @@ with saved_tab:
                 st.write(f"**College:** {profile.college or 'Not set'}")
                 st.write(f"**Degree / Branch:** {profile.degree or 'Not set'} / {profile.branch or 'Not set'}")
                 st.write(f"**Graduation Year:** {profile.graduation_year or 'Not set'}")
-        with right:
-            with st.container(border=True):
-                panel("Career signals")
-                st.write(f"**Skills:** {profile.skills or 'Not set'}")
-                st.write(f"**Interests:** {profile.interests or 'Not set'}")
+        with right, st.container(border=True):
+            panel("Career signals")
+            st.write(f"**Skills:** {profile.skills or 'Not set'}")
+            st.write(f"**Interests:** {profile.interests or 'Not set'}")
     else:
         empty_state("No saved profile yet", "Complete the form to personalize recommendations, roadmaps, and resume scoring.")

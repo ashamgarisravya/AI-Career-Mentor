@@ -8,9 +8,13 @@ import streamlit as st
 
 from utils.database import add_activity, initialize_database, load_profile
 from utils.production import get_logger
-from utils.resume_builder import build_resume_pdf, completion_score, normalize_resume_data, validate_resume_data
+from utils.resume_builder import (
+    build_resume_pdf,
+    completion_score,
+    normalize_resume_data,
+    validate_resume_data,
+)
 from utils.ui import badge, bullet_list, inject_styles, page_header, panel, status_kind
-
 
 st.set_page_config(page_title="Resume Builder | AI Career Mentor", layout="wide")
 inject_styles()
@@ -104,14 +108,13 @@ with preview_tab:
                 else:
                     st.write("Not provided yet.")
 
-with validation_tab:
-    with st.container(border=True):
-        panel("Validation results")
-        if errors:
-            st.error("Fix the issues below before generating a PDF.")
-            bullet_list(errors)
-        else:
-            st.success("All required resume inputs are valid.")
+with validation_tab, st.container(border=True):
+    panel("Validation results")
+    if errors:
+        st.error("Fix the issues below before generating a PDF.")
+        bullet_list(errors)
+    else:
+        st.success("All required resume inputs are valid.")
 
 with export_tab:
     if submitted:

@@ -19,7 +19,6 @@ from utils.knowledge import recommend_careers
 from utils.production import get_logger
 from utils.ui import badge, bullet_list, inject_styles, page_header, panel, status_kind
 
-
 st.set_page_config(page_title="Career Recommendation | AI Career Mentor", layout="wide")
 inject_styles()
 initialize_database()
@@ -90,25 +89,24 @@ st.markdown(
 )
 
 table_tab, detail_tab = st.tabs(["Compare Roles", "Role Details"])
-with table_tab:
-    with st.container(border=True):
-        panel("Top career matches")
-        st.dataframe(
-            pd.DataFrame(
-                [
-                    {
-                        "Career": item["title"],
-                        "Match": f"{item['match']}%",
-                        "Salary": item["salary_range"],
-                        "Growth": item["growth"],
-                        "Industry": item["industry"],
-                    }
-                    for item in recommendations
-                ]
-            ),
-            use_container_width=True,
-            hide_index=True,
-        )
+with table_tab, st.container(border=True):
+    panel("Top career matches")
+    st.dataframe(
+        pd.DataFrame(
+            [
+                {
+                    "Career": item["title"],
+                    "Match": f"{item['match']}%",
+                    "Salary": item["salary_range"],
+                    "Growth": item["growth"],
+                    "Industry": item["industry"],
+                }
+                for item in recommendations
+            ]
+        ),
+        use_container_width=True,
+        hide_index=True,
+    )
 
 with detail_tab:
     for item in recommendations[:3]:

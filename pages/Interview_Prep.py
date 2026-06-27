@@ -6,11 +6,16 @@ import sqlite3
 
 import streamlit as st
 
-from utils.database import add_activity, initialize_database, load_profile, save_interview_score, split_list
+from utils.database import (
+    add_activity,
+    initialize_database,
+    load_profile,
+    save_interview_score,
+    split_list,
+)
 from utils.interview import evaluate_answer, generate_questions
 from utils.production import get_logger
 from utils.ui import badge, bullet_list, inject_styles, page_header, panel, status_kind
-
 
 st.set_page_config(page_title="Interview Preparation | AI Career Mentor", layout="wide")
 inject_styles()

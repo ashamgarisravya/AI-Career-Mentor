@@ -147,6 +147,27 @@ If port `8501` is busy:
 streamlit run app.py --server.port 8502
 ```
 
+## Development Tooling
+
+Install development tools:
+
+```bash
+python -m pip install -r requirements-dev.txt
+```
+
+Run code quality checks:
+
+```bash
+python -m ruff check app.py pages utils
+python -m mypy app.py pages utils
+python -m flake8 app.py pages utils
+python -m pylint app.py pages utils
+python -m bandit -c pyproject.toml -r app.py pages utils
+python -m vulture app.py pages utils vulture_whitelist.py --min-confidence 100
+$files = @("app.py") + (Get-ChildItem pages,utils -Filter *.py | ForEach-Object { $_.FullName })
+python -m pyupgrade --py311-plus @files
+```
+
 ## Screenshots
 
 Add screenshots to `assets/screenshots/` and update these placeholders.

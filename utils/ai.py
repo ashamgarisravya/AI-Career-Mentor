@@ -10,7 +10,6 @@ from typing import Any
 
 from dotenv import load_dotenv
 
-
 load_dotenv()
 
 DEFAULT_OPENAI_MODEL = "gpt-4o-mini"

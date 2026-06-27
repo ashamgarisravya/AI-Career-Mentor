@@ -8,7 +8,6 @@ from utils.database import initialize_database
 from utils.production import get_logger
 from utils.ui import inject_styles, page_header
 
-
 APP_TITLE = "AI Career Mentor"
 logger = get_logger(__name__)
 PAGES = [
