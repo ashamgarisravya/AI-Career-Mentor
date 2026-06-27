@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+import sqlite3
+
 import streamlit as st
 
 from utils.database import add_activity, initialize_database, load_profile
+from utils.production import get_logger
 from utils.resume_builder import build_resume_pdf, completion_score, normalize_resume_data, validate_resume_data
 from utils.ui import badge, bullet_list, inject_styles, page_header, panel, status_kind
 
@@ -13,6 +16,7 @@ st.set_page_config(page_title="Resume Builder | AI Career Mentor", layout="wide"
 inject_styles()
 initialize_database()
 profile = load_profile()
+logger = get_logger(__name__)
 
 page_header(
     "Resume Builder",
@@ -114,21 +118,29 @@ with export_tab:
         if errors:
             st.error("PDF was not generated because validation failed.")
         else:
-            try:
-                pdf_bytes = build_resume_pdf(resume_data)
-            except ValueError as exc:
-                st.error(str(exc))
-            else:
-                add_activity("Resume PDF generated", f"Generated resume for {resume_data['name'] or 'learner'}")
-                st.success("Resume PDF generated.")
-                st.markdown(badge("Download ready", "success"), unsafe_allow_html=True)
-                st.download_button(
-                    "Download Resume PDF",
-                    data=pdf_bytes,
-                    file_name="ai_career_mentor_resume.pdf",
-                    mime="application/pdf",
-                    use_container_width=True,
-                )
+            with st.spinner("Generating professional PDF..."):
+                try:
+                    pdf_bytes = build_resume_pdf(resume_data)
+                except ValueError as exc:
+                    st.error(str(exc))
+                except (OSError, RuntimeError) as exc:
+                    logger.exception("Resume PDF generation failed: %s", exc)
+                    st.error("Resume PDF could not be generated. Please review the content and try again.")
+                else:
+                    try:
+                        add_activity("Resume PDF generated", f"Generated resume for {resume_data['name'] or 'learner'}")
+                    except sqlite3.Error as exc:
+                        logger.exception("Resume PDF activity save failed: %s", exc)
+                        st.warning("PDF is ready, but activity history could not be updated.")
+                    st.success("Resume PDF generated.")
+                    st.markdown(badge("Download ready", "success"), unsafe_allow_html=True)
+                    st.download_button(
+                        "Download Resume PDF",
+                        data=pdf_bytes,
+                        file_name="ai_career_mentor_resume.pdf",
+                        mime="application/pdf",
+                        use_container_width=True,
+                    )
     else:
         with st.container(border=True):
             panel("Export status")

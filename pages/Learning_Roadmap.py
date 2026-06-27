@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+import sqlite3
+
 import streamlit as st
 
 from utils.database import add_activity, initialize_database, load_profile, save_roadmap, split_list
 from utils.roadmap import calculate_progress, generate_roadmaps
+from utils.production import get_logger
 from utils.ui import badge, bullet_list, inject_styles, page_header, panel, status_kind
 
 
@@ -13,16 +16,18 @@ st.set_page_config(page_title="Learning Roadmap | AI Career Mentor", layout="wid
 inject_styles()
 initialize_database()
 profile = load_profile()
+logger = get_logger(__name__)
 
 page_header(
     "Learning Roadmap",
     "Plan the next 90 days with weekly milestones, project work, resources, and progress tracking.",
     [("30/60/90 plan", "info"), ("Progress tracking", "success")],
 )
-target = st.text_input("Target Career", value=profile.target_career if profile else "AI Engineer")
+target = st.text_input("Target Career", value=profile.target_career if profile else "AI Engineer").strip() or "AI Engineer"
 skills = split_list(profile.skills) if profile else []
 
-roadmaps = generate_roadmaps(skills, target)
+with st.spinner("Preparing roadmap..."):
+    roadmaps = generate_roadmaps(skills, target)
 completed = {}
 for period, items in roadmaps.items():
     for item in items:
@@ -32,8 +37,15 @@ for period, items in roadmaps.items():
 progress_percent = calculate_progress(completed, roadmaps)
 add = st.button("Refresh Roadmap", use_container_width=True)
 if add:
-    save_roadmap(target_career=target, skills=skills, roadmap=roadmaps, progress=progress_percent)
-    add_activity("Learning roadmap generated", f"Roadmap for {target}")
+    with st.spinner("Saving roadmap snapshot..."):
+        try:
+            save_roadmap(target_career=target, skills=skills, roadmap=roadmaps, progress=progress_percent)
+            add_activity("Learning roadmap generated", f"Roadmap for {target}")
+        except sqlite3.Error as exc:
+            logger.exception("Roadmap save failed: %s", exc)
+            st.error("Roadmap could not be saved. Please try again.")
+        else:
+            st.success("Roadmap saved.")
 c1, c2, c3 = st.columns(3)
 c1.metric("Learning Progress", f"{progress_percent}%")
 c2.metric("Target Career", target)

@@ -22,14 +22,15 @@ page_header(
     [("Resume compared", "success" if resume else "warning"), ("Prioritized gaps", "info")],
 )
 
-target = st.text_input("Target Career", value=profile.target_career if profile else "AI Engineer")
+target = st.text_input("Target Career", value=profile.target_career if profile else "AI Engineer").strip() or "AI Engineer"
 profile_skills = split_list(profile.skills) if profile else []
 resume_skills = extract_skills_from_text(resume["resume_text"]) if resume else []
 current_skills = st.text_area("Current Skills", value=", ".join(merge_skills(profile_skills, resume_skills)))
 skills = split_list(current_skills)
 
 career = find_career(target)
-rows = analyze_skill_gap(skills, career.title, resume["resume_text"] if resume else "")
+with st.spinner("Analyzing skill gaps..."):
+    rows = analyze_skill_gap(skills, career.title, resume["resume_text"] if resume else "")
 
 if not rows:
     st.success("No major skill gap detected for the selected target career.")

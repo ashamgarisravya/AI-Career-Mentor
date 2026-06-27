@@ -185,6 +185,19 @@ def bullet_list(items: Iterable[str]) -> None:
     st.markdown(f'<ul class="mentor-list">{html}</ul>', unsafe_allow_html=True)
 
 
+def empty_state(title: str, message: str) -> None:
+    """Render a consistent empty state."""
+    st.markdown(
+        f"""
+        <div class="mentor-panel">
+            <div class="mentor-panel-title">{escape(title)}</div>
+            <div class="mentor-panel-copy">{escape(message)}</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
 def status_kind(score: int) -> str:
     """Map a score to a badge style."""
     if score >= 75:

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import sqlite3
+
 import pandas as pd
 import streamlit as st
 
@@ -14,6 +16,7 @@ from utils.database import (
     split_list,
 )
 from utils.knowledge import recommend_careers
+from utils.production import get_logger
 from utils.ui import badge, bullet_list, inject_styles, page_header, panel, status_kind
 
 
@@ -22,6 +25,7 @@ inject_styles()
 initialize_database()
 profile = load_profile()
 resume = load_latest_resume_analysis()
+logger = get_logger(__name__)
 
 page_header(
     "Career Recommendation",
@@ -42,24 +46,32 @@ with st.form("career_form"):
 
 skills = split_list(skills_text)
 interests = split_list(interests_text)
-recommendations = recommend_careers(
-    skills,
-    interests,
-    education,
-    industry,
-    resume_text=resume["resume_text"] if resume else "",
-    resume_missing_skills=resume["missing_skills"] if resume else [],
-)
+with st.spinner("Preparing career recommendations..."):
+    recommendations = recommend_careers(
+        skills,
+        interests,
+        education,
+        industry,
+        resume_text=resume["resume_text"] if resume else "",
+        resume_missing_skills=resume["missing_skills"] if resume else [],
+    )
 
 if submitted:
-    save_career_recommendations(
-        skills=skills,
-        interests=interests,
-        education=education,
-        target_industry=industry,
-        recommendations=recommendations,
-    )
-    add_activity("Career recommendations generated", f"Top role: {recommendations[0]['title']}")
+    with st.spinner("Saving recommendation run..."):
+        try:
+            save_career_recommendations(
+                skills=skills,
+                interests=interests,
+                education=education,
+                target_industry=industry,
+                recommendations=recommendations,
+            )
+            add_activity("Career recommendations generated", f"Top role: {recommendations[0]['title']}")
+        except sqlite3.Error as exc:
+            logger.exception("Career recommendation save failed: %s", exc)
+            st.error("Recommendations were generated but could not be saved to history.")
+        else:
+            st.success("Career recommendations saved.")
 
 top = recommendations[0]
 c1, c2, c3 = st.columns(3)

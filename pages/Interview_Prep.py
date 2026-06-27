@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+import sqlite3
+
 import streamlit as st
 
 from utils.database import add_activity, initialize_database, load_profile, save_interview_score, split_list
 from utils.interview import evaluate_answer, generate_questions
+from utils.production import get_logger
 from utils.ui import badge, bullet_list, inject_styles, page_header, panel, status_kind
 
 
@@ -13,15 +16,17 @@ st.set_page_config(page_title="Interview Preparation | AI Career Mentor", layout
 inject_styles()
 initialize_database()
 profile = load_profile()
+logger = get_logger(__name__)
 
 page_header(
     "Interview Preparation",
     "Practice HR, technical, behavioral, and coding questions with scored feedback.",
     [("Question bank", "info"), ("Mock scoring", "success")],
 )
-target = st.text_input("Target Career", value=profile.target_career if profile else "AI Engineer")
+target = st.text_input("Target Career", value=profile.target_career if profile else "AI Engineer").strip() or "AI Engineer"
 skills = split_list(profile.skills) if profile else []
-questions = generate_questions(skills, target)
+with st.spinner("Preparing interview questions..."):
+    questions = generate_questions(skills, target)
 
 tabs = st.tabs(list(questions.keys()) + ["Mock Interview"])
 for tab, (category, items) in zip(tabs[:-1], questions.items(), strict=False):
@@ -39,16 +44,21 @@ with tabs[-1]:
         if not answer.strip():
             st.warning("Write an answer before evaluating.")
         else:
-            result = evaluate_answer(answer, selected_question, target)
-            save_interview_score(
-                target_career=target,
-                question=selected_question,
-                answer=answer,
-                score=int(result["score"]),
-                feedback=str(result["feedback"]),
-                suggestions=result["suggestions"],
-            )
-            add_activity("Mock interview evaluated", f"Score: {result['score']}%")
+            with st.spinner("Evaluating answer..."):
+                result = evaluate_answer(answer, selected_question, target)
+                try:
+                    save_interview_score(
+                        target_career=target,
+                        question=selected_question,
+                        answer=answer,
+                        score=int(result["score"]),
+                        feedback=str(result["feedback"]),
+                        suggestions=result["suggestions"],
+                    )
+                    add_activity("Mock interview evaluated", f"Score: {result['score']}%")
+                except sqlite3.Error as exc:
+                    logger.exception("Interview score save failed: %s", exc)
+                    st.error("Feedback was generated but could not be saved to history.")
             c1, c2 = st.columns([1, 2])
             c1.metric("Score", f"{result['score']}%")
             with c2:

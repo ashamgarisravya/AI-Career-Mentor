@@ -5,10 +5,12 @@ from __future__ import annotations
 import streamlit as st
 
 from utils.database import initialize_database
+from utils.production import get_logger
 from utils.ui import inject_styles, page_header
 
 
 APP_TITLE = "AI Career Mentor"
+logger = get_logger(__name__)
 PAGES = [
     ("Dashboard", "pages/Dashboard.py"),
     ("Resume Analyzer", "pages/Resume_Analyzer.py"),
@@ -57,7 +59,8 @@ def render_sidebar() -> None:
                 ],
                 default_index=0,
             )
-        except Exception:
+        except ImportError:
+            logger.info("streamlit-option-menu is unavailable; using native page links.")
             st.caption("Navigation")
         st.caption("Pages")
         for label, page_path in PAGES:

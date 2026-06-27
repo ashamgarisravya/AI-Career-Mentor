@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import sqlite3
+
 import streamlit as st
 
 from utils.ai import ai_status_message
@@ -14,13 +16,15 @@ from utils.database import (
     split_list,
 )
 from utils.pdf_parser import extract_pdf_text
-from utils.ui import badge, bullet_list, inject_styles, page_header, panel, status_kind
+from utils.production import get_logger, validate_pdf_upload, validate_required
+from utils.ui import badge, bullet_list, empty_state, inject_styles, page_header, panel, status_kind
 
 
 st.set_page_config(page_title="Resume Analyzer | AI Career Mentor", layout="wide")
 inject_styles()
 initialize_database()
 profile = load_profile()
+logger = get_logger(__name__)
 
 page_header(
     "Resume Analyzer",
@@ -38,31 +42,47 @@ with input_col:
 with target_col:
     with st.container(border=True):
         panel("Target role", "The ATS score is calibrated to this role.")
-        target = st.text_input("Target Career", value=profile.target_career if profile else "AI Engineer")
+        target = st.text_input("Target Career", value=profile.target_career if profile else "AI Engineer").strip() or "AI Engineer"
 
 if uploaded:
-    extracted = extract_pdf_text(uploaded.getvalue())
-    if extracted:
-        st.success("PDF text extracted successfully.")
-        with st.expander("Preview extracted text"):
-            st.write(extracted[:3000])
+    upload_errors = validate_pdf_upload(uploaded)
+    if upload_errors:
+        st.error("Uploaded file is not ready for analysis.")
+        bullet_list(upload_errors)
     else:
-        st.warning("Could not extract text from this PDF. Paste the resume text manually below.")
-    resume_text = extracted or resume_text
+        with st.spinner("Extracting resume text..."):
+            extracted = extract_pdf_text(uploaded.getvalue())
+        if extracted:
+            st.success("PDF text extracted successfully.")
+            with st.expander("Preview extracted text"):
+                st.write(extracted[:3000])
+        else:
+            st.warning("Could not extract text from this PDF. Paste the resume text manually below.")
+        resume_text = extracted or resume_text
 
 if st.button("Analyze Resume", use_container_width=True):
-    if not resume_text.strip():
-        st.warning("Upload a readable PDF or paste resume text before analyzing.")
+    errors = validate_required({"Resume text": resume_text, "Target career": target})
+    if uploaded:
+        errors.extend(validate_pdf_upload(uploaded))
+    if errors:
+        st.error("Resume analysis needs a few fixes.")
+        bullet_list(errors)
     else:
-        analysis = analyze_resume_text(resume_text, target, split_list(profile.skills) if profile else [])
-        save_resume_analysis(
-            filename=uploaded.name if uploaded else "pasted-resume.txt",
-            resume_text=resume_text,
-            target_career=target,
-            **analysis,
-        )
-        st.success("Resume analysis saved.")
-        st.rerun()
+        with st.spinner("Analyzing resume and saving ATS history..."):
+            try:
+                analysis = analyze_resume_text(resume_text, target, split_list(profile.skills) if profile else [])
+                save_resume_analysis(
+                    filename=uploaded.name if uploaded else "pasted-resume.txt",
+                    resume_text=resume_text,
+                    target_career=target,
+                    **analysis,
+                )
+            except (sqlite3.Error, ValueError) as exc:
+                logger.exception("Resume analysis failed: %s", exc)
+                st.error("Resume analysis could not be completed. Please try again.")
+            else:
+                st.success("Resume analysis saved.")
+                st.rerun()
 
 latest = load_latest_resume_analysis()
 if latest:
@@ -109,4 +129,4 @@ if latest:
             panel("Actionable suggestions")
             bullet_list(latest["suggestions"])
 else:
-    st.info("No resume analysis has been saved yet.")
+    empty_state("No resume analysis yet", "Upload a PDF or paste resume text to create the first ATS report.")

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import sqlite3
+
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
@@ -17,16 +19,40 @@ from utils.database import (
     split_list,
 )
 from utils.knowledge import missing_skills_for_target
+from utils.production import get_logger
 from utils.ui import badge, inject_styles, page_header, panel, status_kind
 
 
 st.set_page_config(page_title="Dashboard | AI Career Mentor", layout="wide")
 inject_styles()
 initialize_database()
+logger = get_logger(__name__)
 
 profile = load_profile()
 latest_resume = load_latest_resume_analysis()
-analytics = dashboard_analytics()
+try:
+    analytics = dashboard_analytics()
+except sqlite3.Error as exc:
+    logger.exception("Dashboard analytics failed: %s", exc)
+    analytics = {
+        "counts": {
+            "profiles": 0,
+            "uploaded_resumes": 0,
+            "ats_history": 0,
+            "career_recommendations": 0,
+            "roadmaps": 0,
+            "interview_scores": 0,
+        },
+        "averages": {
+            "avg_ats": 0,
+            "avg_career_match": 0,
+            "avg_learning_progress": 0,
+            "avg_interview_score": 0,
+        },
+        "ats_history": [],
+        "interview_scores": [],
+        "career_recommendations": [],
+    }
 
 if profile is None:
     page_header(

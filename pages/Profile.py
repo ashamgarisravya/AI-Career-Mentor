@@ -2,16 +2,20 @@
 
 from __future__ import annotations
 
+import sqlite3
+
 import streamlit as st
 
 from utils.database import initialize_database, load_profile, save_profile, split_list
-from utils.ui import badge, inject_styles, page_header, panel
+from utils.production import get_logger, validate_email, validate_required
+from utils.ui import badge, empty_state, inject_styles, page_header, panel
 
 
 st.set_page_config(page_title="Profile | AI Career Mentor", layout="wide")
 inject_styles()
 initialize_database()
 profile = load_profile()
+logger = get_logger(__name__)
 
 page_header(
     "Profile",
@@ -47,23 +51,35 @@ with form_tab:
 
         submitted = st.form_submit_button("Save Profile", use_container_width=True)
         if submitted:
-            if not name.strip():
-                st.error("Please enter your name before saving.")
+            errors = validate_required({"Name": name})
+            email_error = validate_email(email)
+            if email_error:
+                errors.append(email_error)
+            if errors:
+                st.error("Please fix the profile details before saving.")
+                for error in errors:
+                    st.write(f"- {error}")
             else:
-                save_profile(
-                    name=name,
-                    email=email,
-                    college=college,
-                    degree=degree,
-                    branch=branch,
-                    graduation_year=graduation_year,
-                    skills=skills,
-                    interests=interests,
-                    target_career=target_career,
-                    experience_level=experience_level,
-                )
-                st.success("Profile saved successfully.")
-                st.rerun()
+                with st.spinner("Saving profile..."):
+                    try:
+                        save_profile(
+                            name=name,
+                            email=email,
+                            college=college,
+                            degree=degree,
+                            branch=branch,
+                            graduation_year=graduation_year,
+                            skills=skills,
+                            interests=interests,
+                            target_career=target_career,
+                            experience_level=experience_level,
+                        )
+                    except sqlite3.Error as exc:
+                        logger.exception("Profile save failed: %s", exc)
+                        st.error("Profile could not be saved. Please try again.")
+                    else:
+                        st.success("Profile saved successfully.")
+                        st.rerun()
 
 with saved_tab:
     if profile:
@@ -96,4 +112,4 @@ with saved_tab:
                 st.write(f"**Skills:** {profile.skills or 'Not set'}")
                 st.write(f"**Interests:** {profile.interests or 'Not set'}")
     else:
-        st.info("No saved profile yet. Complete the form to personalize the application.")
+        empty_state("No saved profile yet", "Complete the form to personalize recommendations, roadmaps, and resume scoring.")
