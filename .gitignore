@@ -14,6 +14,8 @@ __pycache__/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
+.pre-commit-cache/
+.pip-audit-cache/
 
 # Streamlit
 .streamlit/secrets.toml
@@ -27,6 +29,8 @@ generated/*
 # Logs and caches
 *.log
 .coverage
+coverage.xml
+htmlcov/
 
 # OS / editor
 .DS_Store

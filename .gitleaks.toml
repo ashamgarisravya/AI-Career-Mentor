@@ -1,0 +1,16 @@
+title = "AI Career Mentor Gitleaks Configuration"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Allow documentation placeholders and example environment files."
+paths = [
+  '''\.env\.example$''',
+  '''README\.md$''',
+  '''docs/.*''',
+]
+regexes = [
+  '''OPENAI_API_KEY=''',
+  '''GEMINI_API_KEY=''',
+]

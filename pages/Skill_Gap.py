@@ -26,10 +26,17 @@ page_header(
     [("Resume compared", "success" if resume else "warning"), ("Prioritized gaps", "info")],
 )
 
-target = st.text_input("Target Career", value=profile.target_career if profile else "AI Engineer").strip() or "AI Engineer"
+target = (
+    st.text_input(
+        "Target Career", value=profile.target_career if profile else "AI Engineer"
+    ).strip()
+    or "AI Engineer"
+)
 profile_skills = split_list(profile.skills) if profile else []
 resume_skills = extract_skills_from_text(resume["resume_text"]) if resume else []
-current_skills = st.text_area("Current Skills", value=", ".join(merge_skills(profile_skills, resume_skills)))
+current_skills = st.text_area(
+    "Current Skills", value=", ".join(merge_skills(profile_skills, resume_skills))
+)
 skills = split_list(current_skills)
 
 career = find_career(target)
@@ -45,7 +52,9 @@ else:
     c2.metric("High Priority", high_priority)
     c3.metric("Detected Skills", len(skills))
     st.markdown(
-        " ".join([badge(f"{career.title}", "info"), badge(f"{high_priority} high priority", "warning")]),
+        " ".join(
+            [badge(f"{career.title}", "info"), badge(f"{high_priority} high priority", "warning")]
+        ),
         unsafe_allow_html=True,
     )
     overview_tab, path_tab = st.tabs(["Gap Matrix", "Learning Paths"])
@@ -54,7 +63,10 @@ else:
         st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
     with path_tab:
         for row in rows:
-            with st.expander(f"{row['Missing Skill']} - {row['Priority']} priority", expanded=row["Priority"] == "High"):
+            with st.expander(
+                f"{row['Missing Skill']} - {row['Priority']} priority",
+                expanded=row["Priority"] == "High",
+            ):
                 left, right = st.columns([1, 2])
                 with left:
                     st.metric("Priority", row["Priority"])

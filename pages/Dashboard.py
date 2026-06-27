@@ -67,9 +67,15 @@ skills = split_list(profile.skills)
 interests = split_list(profile.interests)
 target = profile.target_career or "AI Engineer"
 missing_skills = missing_skills_for_target(skills, target)
-resume_score = int(latest_resume["ats_score"]) if latest_resume else analyze_resume_text("", target, skills)["ats_score"]
+resume_score = (
+    int(latest_resume["ats_score"])
+    if latest_resume
+    else analyze_resume_text("", target, skills)["ats_score"]
+)
 career_match = min(98, 35 + len(skills) * 10 + (15 if target else 0) + len(interests) * 4)
-skill_gap = max(0, min(100, int((len(missing_skills) / max(len(skills) + len(missing_skills), 1)) * 100)))
+skill_gap = max(
+    0, min(100, int((len(missing_skills) / max(len(skills) + len(missing_skills), 1)) * 100))
+)
 roadmap_progress = min(100, 20 + len(skills) * 8 + (15 if latest_resume else 0))
 interview_readiness = min(100, (career_match + resume_score + (100 - skill_gap)) // 3)
 if analytics["averages"]["avg_career_match"]:
@@ -106,21 +112,34 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-overview_tab, analytics_tab, profile_tab, activity_tab = st.tabs(["Overview", "Analytics", "Profile", "Activity"])
+overview_tab, analytics_tab, profile_tab, activity_tab = st.tabs(
+    ["Overview", "Analytics", "Profile", "Activity"]
+)
 
 with overview_tab:
     left_chart, right_chart = st.columns([1, 1.2])
     with left_chart:
         with st.container(border=True):
-            panel("Career Match Gauge", "A blended indicator based on target role, saved skills, interests, and resume signal.")
-            st.plotly_chart(gauge("Career Match", career_match, "#2563eb"), use_container_width=True)
+            panel(
+                "Career Match Gauge",
+                "A blended indicator based on target role, saved skills, interests, and resume signal.",
+            )
+            st.plotly_chart(
+                gauge("Career Match", career_match, "#2563eb"), use_container_width=True
+            )
     with right_chart:
         with st.container(border=True):
             panel("Readiness Breakdown", "A side-by-side view of the main SaaS operating metrics.")
             st.plotly_chart(
                 bar_progress(
                     ["ATS", "Career Match", "Skill Readiness", "Learning", "Interview"],
-                    [resume_score, career_match, 100 - skill_gap, roadmap_progress, interview_readiness],
+                    [
+                        resume_score,
+                        career_match,
+                        100 - skill_gap,
+                        roadmap_progress,
+                        interview_readiness,
+                    ],
                 ),
                 use_container_width=True,
             )
@@ -133,7 +152,11 @@ with overview_tab:
         with st.container(border=True):
             panel("Resume status")
             st.progress(resume_score / 100)
-            st.write("Latest resume analysis is available." if latest_resume else "Analyze a resume to unlock ATS insights.")
+            st.write(
+                "Latest resume analysis is available."
+                if latest_resume
+                else "Analyze a resume to unlock ATS insights."
+            )
 
 with analytics_tab:
     counts = analytics["counts"]

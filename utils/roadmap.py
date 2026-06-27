@@ -74,7 +74,11 @@ def generate_roadmaps(skills: list[str], target_career: str) -> dict[str, list[d
                 "goal": "Turn project work into interview-ready stories.",
                 "project": "Case study write-up with problem, approach, tradeoffs, and result.",
                 "milestone": "Two STAR stories and one architecture/process diagram.",
-                "resources": ("STAR method practice", "Case study examples", "Peer review checklist"),
+                "resources": (
+                    "STAR method practice",
+                    "Case study examples",
+                    "Peer review checklist",
+                ),
                 "skills": [first, second, third],
             },
         ],
@@ -84,7 +88,11 @@ def generate_roadmaps(skills: list[str], target_career: str) -> dict[str, list[d
                 "goal": f"Add {fourth} and prepare role-specific interview answers.",
                 "project": f"Extend the portfolio project with a {fourth} feature.",
                 "milestone": "Complete three mock interviews and close the highest priority gap.",
-                "resources": ("Technical interview drills", "Mock interview notes", *career.resources[:1]),
+                "resources": (
+                    "Technical interview drills",
+                    "Mock interview notes",
+                    *career.resources[:1],
+                ),
                 "skills": [fourth],
             },
             {
@@ -92,7 +100,11 @@ def generate_roadmaps(skills: list[str], target_career: str) -> dict[str, list[d
                 "goal": "Apply consistently and refine based on feedback.",
                 "project": "Application tracker, targeted outreach, and weekly retrospective.",
                 "milestone": "Apply to 20 aligned roles and revise resume from response patterns.",
-                "resources": ("LinkedIn profile review", "Target company research", "Application tracker"),
+                "resources": (
+                    "LinkedIn profile review",
+                    "Target company research",
+                    "Application tracker",
+                ),
                 "skills": [row["Missing Skill"] for row in skill_gap_rows[:3]],
             },
         ],
@@ -114,20 +126,28 @@ def generate_roadmaps(skills: list[str], target_career: str) -> dict[str, list[d
         },
         ensure_ascii=True,
     )
-    result = ai_json(task="learning roadmap", prompt=prompt, fallback={"roadmap": fallback}, expected_type=dict)
+    result = ai_json(
+        task="learning roadmap", prompt=prompt, fallback={"roadmap": fallback}, expected_type=dict
+    )
     return _valid_roadmap(result.get("roadmap"), fallback)
 
 
-def calculate_progress(completed: dict[str, bool], roadmaps: dict[str, list[dict[str, object]]]) -> int:
+def calculate_progress(
+    completed: dict[str, bool], roadmaps: dict[str, list[dict[str, object]]]
+) -> int:
     """Calculate roadmap completion percentage from checkbox state."""
     total = sum(len(items) for items in roadmaps.values())
     if total == 0:
         return 0
-    done = sum(1 for items in roadmaps.values() for item in items if completed.get(str(item["week"])))
+    done = sum(
+        1 for items in roadmaps.values() for item in items if completed.get(str(item["week"]))
+    )
     return round((done / total) * 100)
 
 
-def _valid_roadmap(value: Any, fallback: dict[str, list[dict[str, object]]]) -> dict[str, list[dict[str, object]]]:
+def _valid_roadmap(
+    value: Any, fallback: dict[str, list[dict[str, object]]]
+) -> dict[str, list[dict[str, object]]]:
     if not isinstance(value, dict):
         return fallback
     valid: dict[str, list[dict[str, object]]] = {}
@@ -148,8 +168,16 @@ def _valid_roadmap(value: Any, fallback: dict[str, list[dict[str, object]]]) -> 
                     "goal": str(item.get("goal", "Build role readiness.")),
                     "project": str(item.get("project", "Portfolio project.")),
                     "milestone": str(item.get("milestone", "Complete and document the work.")),
-                    "resources": [str(resource) for resource in resources] if isinstance(resources, list) else [str(resources)],
-                    "skills": [str(skill) for skill in skills] if isinstance(skills, list) else [str(skills)],
+                    "resources": (
+                        [str(resource) for resource in resources]
+                        if isinstance(resources, list)
+                        else [str(resources)]
+                    ),
+                    "skills": (
+                        [str(skill) for skill in skills]
+                        if isinstance(skills, list)
+                        else [str(skills)]
+                    ),
                 }
             )
         valid[period] = valid_items or fallback[period]

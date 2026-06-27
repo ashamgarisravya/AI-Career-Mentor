@@ -71,8 +71,7 @@ def execute_write(query: str, parameters: tuple[Any, ...] = ()) -> int:
 def initialize_database() -> None:
     """Create application tables and add missing columns for older local DBs."""
     with get_connection() as connection:
-        connection.execute(
-            """
+        connection.execute("""
             CREATE TABLE IF NOT EXISTS profiles (
                 id INTEGER PRIMARY KEY CHECK (id = 1),
                 name TEXT NOT NULL DEFAULT '',
@@ -88,8 +87,7 @@ def initialize_database() -> None:
                 created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
             )
-            """
-        )
+            """)
         _ensure_columns(
             connection,
             "profiles",
@@ -98,8 +96,7 @@ def initialize_database() -> None:
                 "experience_level": "TEXT NOT NULL DEFAULT ''",
             },
         )
-        connection.execute(
-            """
+        connection.execute("""
             CREATE TABLE IF NOT EXISTS resume_analyses (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 resume_id INTEGER,
@@ -115,8 +112,7 @@ def initialize_database() -> None:
                 summary TEXT NOT NULL DEFAULT '',
                 created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
             )
-            """
-        )
+            """)
         _ensure_columns(
             connection,
             "resume_analyses",
@@ -125,8 +121,7 @@ def initialize_database() -> None:
                 "target_career": "TEXT NOT NULL DEFAULT ''",
             },
         )
-        connection.execute(
-            """
+        connection.execute("""
             CREATE TABLE IF NOT EXISTS uploaded_resumes (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 filename TEXT NOT NULL DEFAULT '',
@@ -134,10 +129,8 @@ def initialize_database() -> None:
                 content_hash TEXT NOT NULL DEFAULT '',
                 created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
             )
-            """
-        )
-        connection.execute(
-            """
+            """)
+        connection.execute("""
             CREATE TABLE IF NOT EXISTS ats_history (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 resume_analysis_id INTEGER,
@@ -147,10 +140,8 @@ def initialize_database() -> None:
                 missing_keyword_count INTEGER NOT NULL DEFAULT 0,
                 created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
             )
-            """
-        )
-        connection.execute(
-            """
+            """)
+        connection.execute("""
             CREATE TABLE IF NOT EXISTS career_recommendations (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 education TEXT NOT NULL DEFAULT '',
@@ -162,10 +153,8 @@ def initialize_database() -> None:
                 top_match INTEGER NOT NULL DEFAULT 0,
                 created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
             )
-            """
-        )
-        connection.execute(
-            """
+            """)
+        connection.execute("""
             CREATE TABLE IF NOT EXISTS roadmaps (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 target_career TEXT NOT NULL DEFAULT '',
@@ -174,10 +163,8 @@ def initialize_database() -> None:
                 progress INTEGER NOT NULL DEFAULT 0,
                 created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
             )
-            """
-        )
-        connection.execute(
-            """
+            """)
+        connection.execute("""
             CREATE TABLE IF NOT EXISTS interview_scores (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 target_career TEXT NOT NULL DEFAULT '',
@@ -188,36 +175,30 @@ def initialize_database() -> None:
                 suggestions TEXT NOT NULL DEFAULT '[]',
                 created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
             )
-            """
-        )
-        connection.execute(
-            """
+            """)
+        connection.execute("""
             CREATE TABLE IF NOT EXISTS activities (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 label TEXT NOT NULL,
                 detail TEXT NOT NULL DEFAULT '',
                 created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
             )
-            """
-        )
+            """)
         _create_indexes(connection)
-        connection.execute(
-            """
+        connection.execute("""
             CREATE TABLE IF NOT EXISTS settings (
                 key TEXT PRIMARY KEY,
                 value TEXT NOT NULL DEFAULT '',
                 updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
             )
-            """
-        )
+            """)
 
 
 def _ensure_columns(
     connection: sqlite3.Connection, table_name: str, columns: dict[str, str]
 ) -> None:
     existing = {
-        row["name"]
-        for row in connection.execute(f"PRAGMA table_info({table_name})").fetchall()
+        row["name"] for row in connection.execute(f"PRAGMA table_info({table_name})").fetchall()
     }
     for name, definition in columns.items():
         if name not in existing:
@@ -560,47 +541,51 @@ def dashboard_analytics() -> dict[str, Any]:
     initialize_database()
     with get_connection() as connection:
         counts = {
-            "profiles": connection.execute("SELECT COUNT(*) AS count FROM profiles").fetchone()["count"],
-            "uploaded_resumes": connection.execute("SELECT COUNT(*) AS count FROM uploaded_resumes").fetchone()["count"],
-            "ats_history": connection.execute("SELECT COUNT(*) AS count FROM ats_history").fetchone()["count"],
-            "career_recommendations": connection.execute("SELECT COUNT(*) AS count FROM career_recommendations").fetchone()["count"],
-            "roadmaps": connection.execute("SELECT COUNT(*) AS count FROM roadmaps").fetchone()["count"],
-            "interview_scores": connection.execute("SELECT COUNT(*) AS count FROM interview_scores").fetchone()["count"],
+            "profiles": connection.execute("SELECT COUNT(*) AS count FROM profiles").fetchone()[
+                "count"
+            ],
+            "uploaded_resumes": connection.execute(
+                "SELECT COUNT(*) AS count FROM uploaded_resumes"
+            ).fetchone()["count"],
+            "ats_history": connection.execute(
+                "SELECT COUNT(*) AS count FROM ats_history"
+            ).fetchone()["count"],
+            "career_recommendations": connection.execute(
+                "SELECT COUNT(*) AS count FROM career_recommendations"
+            ).fetchone()["count"],
+            "roadmaps": connection.execute("SELECT COUNT(*) AS count FROM roadmaps").fetchone()[
+                "count"
+            ],
+            "interview_scores": connection.execute(
+                "SELECT COUNT(*) AS count FROM interview_scores"
+            ).fetchone()["count"],
         }
-        averages = connection.execute(
-            """
+        averages = connection.execute("""
             SELECT
                 COALESCE(ROUND(AVG(ats_score)), 0) AS avg_ats,
                 COALESCE(ROUND((SELECT AVG(top_match) FROM career_recommendations)), 0) AS avg_career_match,
                 COALESCE(ROUND((SELECT AVG(progress) FROM roadmaps)), 0) AS avg_learning_progress,
                 COALESCE(ROUND((SELECT AVG(score) FROM interview_scores)), 0) AS avg_interview_score
             FROM ats_history
-            """
-        ).fetchone()
-        ats_rows = connection.execute(
-            """
+            """).fetchone()
+        ats_rows = connection.execute("""
             SELECT ats_score, target_career, created_at
             FROM ats_history
             ORDER BY created_at ASC, id ASC
             LIMIT 30
-            """
-        ).fetchall()
-        interview_rows = connection.execute(
-            """
+            """).fetchall()
+        interview_rows = connection.execute("""
             SELECT score, target_career, created_at
             FROM interview_scores
             ORDER BY created_at ASC, id ASC
             LIMIT 30
-            """
-        ).fetchall()
-        recommendation_rows = connection.execute(
-            """
+            """).fetchall()
+        recommendation_rows = connection.execute("""
             SELECT top_career, top_match, created_at
             FROM career_recommendations
             ORDER BY created_at DESC, id DESC
             LIMIT 10
-            """
-        ).fetchall()
+            """).fetchall()
     return {
         "counts": counts,
         "averages": dict(averages),
@@ -656,9 +641,7 @@ def load_setting(key: str, default: str = "") -> str:
     """Load a settings value."""
     initialize_database()
     with get_connection() as connection:
-        row = connection.execute(
-            "SELECT value FROM settings WHERE key = ?", (key,)
-        ).fetchone()
+        row = connection.execute("SELECT value FROM settings WHERE key = ?", (key,)).fetchone()
     return default if row is None else str(row["value"])
 
 

@@ -59,7 +59,12 @@ def generate_questions(skills: list[str], target_career: str) -> dict[str, list[
         },
         ensure_ascii=True,
     )
-    result = ai_json(task="interview questions", prompt=prompt, fallback={"questions": fallback}, expected_type=dict)
+    result = ai_json(
+        task="interview questions",
+        prompt=prompt,
+        fallback={"questions": fallback},
+        expected_type=dict,
+    )
     return _valid_questions(result.get("questions"), fallback)
 
 
@@ -69,11 +74,26 @@ def evaluate_answer(answer: str, question: str = "", target_career: str = "") ->
     lowered = clean.lower()
     words = re.findall(r"[a-zA-Z][a-zA-Z'-]+", clean)
     word_count = len(words)
-    has_example = any(token in lowered for token in ("for example", "project", "built", "created", "worked on", "implemented"))
-    has_result = any(token in lowered for token in ("result", "impact", "improved", "reduced", "increased", "learned"))
-    has_metric = bool(re.search(r"\b\d+(?:\.\d+)?\s*(?:%|x|users|hours|days|projects|models)?\b", clean))
-    has_structure = any(token in lowered for token in ("situation", "task", "action", "result", "first", "then", "finally"))
-    role_terms = [term.lower() for term in find_career(target_career).required_skills] if target_career else []
+    has_example = any(
+        token in lowered
+        for token in ("for example", "project", "built", "created", "worked on", "implemented")
+    )
+    has_result = any(
+        token in lowered
+        for token in ("result", "impact", "improved", "reduced", "increased", "learned")
+    )
+    has_metric = bool(
+        re.search(r"\b\d+(?:\.\d+)?\s*(?:%|x|users|hours|days|projects|models)?\b", clean)
+    )
+    has_structure = any(
+        token in lowered
+        for token in ("situation", "task", "action", "result", "first", "then", "finally")
+    )
+    role_terms = (
+        [term.lower() for term in find_career(target_career).required_skills]
+        if target_career
+        else []
+    )
     role_hits = sum(1 for term in role_terms if term in lowered)
 
     score = 20
@@ -89,11 +109,15 @@ def evaluate_answer(answer: str, question: str = "", target_career: str = "") ->
     if word_count < 40:
         suggestions.append("Add enough detail to cover situation, action, and result.")
     if not has_example:
-        suggestions.append("Anchor the answer in a specific project, internship, coursework, or team example.")
+        suggestions.append(
+            "Anchor the answer in a specific project, internship, coursework, or team example."
+        )
     if not has_result:
         suggestions.append("Explain the outcome and what changed because of your work.")
     if not has_metric:
-        suggestions.append("Include a number such as accuracy, time saved, users, defects reduced, or scope delivered.")
+        suggestions.append(
+            "Include a number such as accuracy, time saved, users, defects reduced, or scope delivered."
+        )
     if target_career and role_hits == 0:
         suggestions.append(f"Connect the answer to {target_career} skills or responsibilities.")
 
@@ -107,7 +131,8 @@ def evaluate_answer(answer: str, question: str = "", target_career: str = "") ->
     fallback = {
         "score": score,
         "feedback": feedback,
-        "suggestions": suggestions or ["Keep it concise, evidence-driven, and tailored to the question."],
+        "suggestions": suggestions
+        or ["Keep it concise, evidence-driven, and tailored to the question."],
         "question": question,
     }
     if word_count < 5:
@@ -127,7 +152,9 @@ def evaluate_answer(answer: str, question: str = "", target_career: str = "") ->
         },
         ensure_ascii=True,
     )
-    result = ai_json(task="interview feedback", prompt=prompt, fallback=fallback, expected_type=dict)
+    result = ai_json(
+        task="interview feedback", prompt=prompt, fallback=fallback, expected_type=dict
+    )
     return _valid_feedback(result, fallback)
 
 
@@ -156,6 +183,7 @@ def _valid_feedback(result: dict[str, Any], fallback: dict[str, Any]) -> dict[st
     return {
         "score": max(0, min(100, score)),
         "feedback": str(result.get("feedback") or fallback["feedback"]),
-        "suggestions": [str(item).strip() for item in suggestions if str(item).strip()] or fallback["suggestions"],
+        "suggestions": [str(item).strip() for item in suggestions if str(item).strip()]
+        or fallback["suggestions"],
         "question": str(result.get("question") or fallback["question"]),
     }

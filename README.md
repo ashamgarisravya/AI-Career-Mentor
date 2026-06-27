@@ -155,6 +155,12 @@ Install development tools:
 python -m pip install -r requirements-dev.txt
 ```
 
+Install Git hooks:
+
+```bash
+python -m pre_commit install
+```
+
 Run code quality checks:
 
 ```bash
@@ -167,6 +173,19 @@ python -m vulture app.py pages utils vulture_whitelist.py --min-confidence 100
 $files = @("app.py") + (Get-ChildItem pages,utils -Filter *.py | ForEach-Object { $_.FullName })
 python -m pyupgrade --py311-plus @files
 ```
+
+Run formatting and repository automation checks:
+
+```bash
+python -m black --check app.py pages utils tests
+python -m pytest --cov=utils --cov=pages --cov=app --cov-report=term-missing --cov-report=xml
+python -m pip_audit --disable-pip --no-deps --cache-dir .pip-audit-cache --ignore-vuln PYSEC-2026-212 --ignore-vuln CVE-2026-33682 -r requirements.txt -r requirements-dev.txt
+python -m pre_commit run --all-files
+```
+
+The repository also includes GitHub Actions workflows for Ruff, Mypy, Bandit, pip-audit, Gitleaks secret scanning, test coverage artifact upload, and changelog generation from tags using git-cliff.
+
+The pip-audit command ignores two Streamlit advisories while the application is intentionally pinned to Streamlit `1.41.1` for compatibility. Remove the `--ignore-vuln` flags when the project is approved to upgrade Streamlit.
 
 ## Screenshots
 

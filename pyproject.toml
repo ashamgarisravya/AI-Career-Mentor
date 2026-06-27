@@ -28,6 +28,22 @@ ignore = [
 
 [tool.ruff.lint.per-file-ignores]
 "pages/*.py" = ["B018"]
+"tests/*.py" = ["B018"]
+"vulture_whitelist.py" = ["B018"]
+
+[tool.black]
+target-version = ["py311"]
+line-length = 100
+extend-exclude = '''
+/(
+  \.venv
+  | venv
+  | env
+  | database
+  | generated
+  | logs
+)/
+'''
 
 [tool.mypy]
 python_version = "3.11"
@@ -88,3 +104,29 @@ max-line-length = 100
 [tool.bandit]
 exclude_dirs = [".venv", "venv", "env", "database", "generated", "logs"]
 skips = ["B101", "B110", "B310"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--strict-markers --strict-config"
+filterwarnings = [
+  "ignore:unclosed database.*:ResourceWarning",
+  "ignore:PyPDF2 is deprecated.*:DeprecationWarning",
+]
+
+[tool.coverage.run]
+branch = true
+source = ["app", "pages", "utils"]
+omit = [
+  ".venv/*",
+  "venv/*",
+  "env/*",
+  "tests/*",
+]
+
+[tool.coverage.report]
+show_missing = true
+skip_empty = true
+
+[tool.pip-audit]
+requirement = ["requirements.txt", "requirements-dev.txt"]
+disable-pip = true

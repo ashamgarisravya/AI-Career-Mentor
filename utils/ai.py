@@ -65,7 +65,16 @@ def ai_json(
             result = _openai_json(task, prompt)
         else:
             result = _gemini_json(task, prompt)
-    except (OSError, TimeoutError, urllib.error.URLError, urllib.error.HTTPError, json.JSONDecodeError, KeyError, TypeError, ValueError):
+    except (
+        OSError,
+        TimeoutError,
+        urllib.error.URLError,
+        urllib.error.HTTPError,
+        json.JSONDecodeError,
+        KeyError,
+        TypeError,
+        ValueError,
+    ):
         return fallback
     return result if isinstance(result, expected_type) else fallback
 

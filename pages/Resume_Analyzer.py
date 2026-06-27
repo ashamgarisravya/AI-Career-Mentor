@@ -40,7 +40,12 @@ with input_col, st.container(border=True):
 with target_col:
     with st.container(border=True):
         panel("Target role", "The ATS score is calibrated to this role.")
-        target = st.text_input("Target Career", value=profile.target_career if profile else "AI Engineer").strip() or "AI Engineer"
+        target = (
+            st.text_input(
+                "Target Career", value=profile.target_career if profile else "AI Engineer"
+            ).strip()
+            or "AI Engineer"
+        )
 
 if uploaded:
     upload_errors = validate_pdf_upload(uploaded)
@@ -55,7 +60,9 @@ if uploaded:
             with st.expander("Preview extracted text"):
                 st.write(extracted[:3000])
         else:
-            st.warning("Could not extract text from this PDF. Paste the resume text manually below.")
+            st.warning(
+                "Could not extract text from this PDF. Paste the resume text manually below."
+            )
         resume_text = extracted or resume_text
 
 if st.button("Analyze Resume", use_container_width=True):
@@ -68,7 +75,9 @@ if st.button("Analyze Resume", use_container_width=True):
     else:
         with st.spinner("Analyzing resume and saving ATS history..."):
             try:
-                analysis = analyze_resume_text(resume_text, target, split_list(profile.skills) if profile else [])
+                analysis = analyze_resume_text(
+                    resume_text, target, split_list(profile.skills) if profile else []
+                )
                 save_resume_analysis(
                     filename=uploaded.name if uploaded else "pasted-resume.txt",
                     resume_text=resume_text,
@@ -122,4 +131,7 @@ if latest:
         panel("Actionable suggestions")
         bullet_list(latest["suggestions"])
 else:
-    empty_state("No resume analysis yet", "Upload a PDF or paste resume text to create the first ATS report.")
+    empty_state(
+        "No resume analysis yet",
+        "Upload a PDF or paste resume text to create the first ATS report.",
+    )

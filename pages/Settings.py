@@ -36,7 +36,11 @@ with pref_tab:
     with left:
         with st.container(border=True):
             panel("Theme")
-            theme = st.selectbox("Preferred Theme", ["System", "Light", "Dark"], index=["System", "Light", "Dark"].index(load_setting("theme", "System")))
+            theme = st.selectbox(
+                "Preferred Theme",
+                ["System", "Light", "Dark"],
+                index=["System", "Light", "Dark"].index(load_setting("theme", "System")),
+            )
             if st.button("Save Theme", use_container_width=True):
                 with st.spinner("Saving theme preference..."):
                     try:
@@ -50,10 +54,16 @@ with pref_tab:
         with st.container(border=True):
             panel("API Key")
             st.markdown(
-                badge("AI key detected", "success") if has_ai_key() else badge("Rule-based mode", "warning"),
+                (
+                    badge("AI key detected", "success")
+                    if has_ai_key()
+                    else badge("Rule-based mode", "warning")
+                ),
                 unsafe_allow_html=True,
             )
-            key_hint = st.text_input("Optional API Key Label", value=load_setting("api_key_label", ""), type="password")
+            key_hint = st.text_input(
+                "Optional API Key Label", value=load_setting("api_key_label", ""), type="password"
+            )
             if st.button("Save API Key Label", use_container_width=True):
                 with st.spinner("Saving API key label..."):
                     try:
@@ -62,7 +72,9 @@ with pref_tab:
                         logger.exception("API key label save failed: %s", exc)
                         st.error("API key label could not be saved.")
                     else:
-                        st.success("API key label saved locally. Secrets should still be stored in environment variables.")
+                        st.success(
+                            "API key label saved locally. Secrets should still be stored in environment variables."
+                        )
 
 with data_tab, st.container(border=True):
     panel("Export Data", "Download profile, resume analysis, activities, and settings as JSON.")
@@ -103,7 +115,9 @@ with data_tab, st.container(border=True):
 with danger_tab:
     with st.container(border=True):
         panel("Database Reset", "Clears local profile, resume, activity, and settings data.")
-        confirm = st.checkbox("I understand this will delete local profile, resume, activity, and settings data.")
+        confirm = st.checkbox(
+            "I understand this will delete local profile, resume, activity, and settings data."
+        )
         if st.button("Clear Database", disabled=not confirm, use_container_width=True):
             with st.spinner("Clearing local database..."):
                 try:
