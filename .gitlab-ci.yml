@@ -1,0 +1,53 @@
+stages:
+  - lint
+  - format
+  - type_check
+  - test
+  - security
+
+variables:
+  PYTHON_VERSION: "3.12"
+
+default:
+  before_script:
+    - python --version
+    - python -m pip install --upgrade pip
+    - python -m pip install ruff mypy pytest bandit pip-audit
+    - python -m pip install -r requirements.txt || true
+    - python -m pip install -r requirements-dev.txt || true
+
+ruff_lint:
+  stage: lint
+  script:
+    - python -m ruff check .
+
+ruff_format_check:
+  stage: format
+  script:
+    - python -m ruff format --check .
+
+mypy_type_check:
+  stage: type_check
+  script:
+    - python -m mypy .
+
+pytest_tests:
+  stage: test
+  script:
+    - python -m pytest --cov=. --cov-report=term-missing --cov-fail-under=80
+
+bandit_scan:
+  stage: security
+  script:
+    - python -m bandit -c pyproject.toml -r .
+
+pip_audit:
+  stage: security
+  script:
+    - python -m pip_audit
+
+gitleaks_scan:
+  stage: security
+  image: zricethezav/gitleaks:v8.18.4
+  script:
+    - gitleaks detect --source . --no-git --exit-code 1
