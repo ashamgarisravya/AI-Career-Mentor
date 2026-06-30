@@ -1,0 +1,9 @@
+[changelog]
+header = "# Changelog"
+body = ""
+trim = true
+
+[git]
+conventional_commits = true
+filter_unconventional = true
+split_commits = false
