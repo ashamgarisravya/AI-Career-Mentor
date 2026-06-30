@@ -1,20 +1,26 @@
-# AI Career Mentor - User Manual
 
-## Overview
-AI Career Mentor helps students and job seekers improve their careers using AI.
+Paste:
 
-## Features
+```md
+# AI Career Mentor Agents
 
-- Resume Analyzer
-- Career Recommendation
-- Skill Gap Analysis
-- Learning Roadmap
-- Interview Preparation
-- Resume Builder
-- User Profile
+## Resume Analyzer
+Analyzes resumes and calculates ATS score.
 
-## Installation
+## Career Recommendation Agent
+Suggests careers based on skills and interests.
 
-```bash
-pip install -r requirements.txt
-streamlit run app.py
+## Skill Gap Analyzer
+Identifies missing technical and soft skills.
+
+## Learning Roadmap Generator
+Creates a personalized learning plan.
+
+## Interview Preparation Agent
+Generates interview questions and evaluates answers.
+
+## Resume Builder
+Creates a professional resume using user profile data.
+
+## Database
+SQLite stores user profiles and progress.
