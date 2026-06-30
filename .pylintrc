@@ -1,0 +1,29 @@
+[MASTER]
+ignore=.venv,venv,env,database,generated,logs
+jobs=0
+py-version=3.11
+persistent=no
+
+[MESSAGES CONTROL]
+disable=
+    C0114,
+    C0115,
+    C0116,
+    C0301,
+    C0103,
+    C0415,
+    R0903,
+    R0902,
+    R0913,
+    R0914,
+    R0915,
+    R0917,
+    W0511,
+    duplicate-code,
+    broad-exception-caught,
+    too-many-locals,
+    too-many-branches,
+    too-many-statements
+
+[FORMAT]
+max-line-length=100

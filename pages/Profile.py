@@ -10,7 +10,6 @@ from utils.database import initialize_database, load_profile, save_profile, spli
 from utils.production import get_logger, validate_email, validate_required
 from utils.ui import badge, empty_state, inject_styles, page_header, panel
 
-
 st.set_page_config(page_title="Profile | AI Career Mentor", layout="wide")
 inject_styles()
 initialize_database()
@@ -27,7 +26,9 @@ form_tab, saved_tab = st.tabs(["Profile Form", "Saved Snapshot"])
 
 with form_tab:
     with st.container(border=True):
-        panel("Learner profile", "Core academic, skill, and career details used across the product.")
+        panel(
+            "Learner profile", "Core academic, skill, and career details used across the product."
+        )
     with st.form("profile_form", clear_on_submit=False):
         left, right = st.columns(2)
         with left:
@@ -37,17 +38,33 @@ with form_tab:
             degree = st.text_input("Degree", value=profile.degree if profile else "")
             branch = st.text_input("Branch", value=profile.branch if profile else "")
         with right:
-            graduation_year = st.text_input("Graduation Year", value=profile.graduation_year if profile else "")
+            graduation_year = st.text_input(
+                "Graduation Year", value=profile.graduation_year if profile else ""
+            )
             experience_level = st.selectbox(
                 "Experience Level",
                 ["Beginner", "Intermediate", "Advanced", "Working Professional"],
-                index=["Beginner", "Intermediate", "Advanced", "Working Professional"].index(profile.experience_level)
-                if profile and profile.experience_level in ["Beginner", "Intermediate", "Advanced", "Working Professional"]
-                else 0,
+                index=(
+                    ["Beginner", "Intermediate", "Advanced", "Working Professional"].index(
+                        profile.experience_level
+                    )
+                    if profile
+                    and profile.experience_level
+                    in ["Beginner", "Intermediate", "Advanced", "Working Professional"]
+                    else 0
+                ),
             )
-            target_career = st.text_input("Target Career", value=profile.target_career if profile else "")
-            skills = st.text_area("Skills", value=profile.skills if profile else "", help="Comma-separated values")
-            interests = st.text_area("Interests", value=profile.interests if profile else "", help="Comma-separated values")
+            target_career = st.text_input(
+                "Target Career", value=profile.target_career if profile else ""
+            )
+            skills = st.text_area(
+                "Skills", value=profile.skills if profile else "", help="Comma-separated values"
+            )
+            interests = st.text_area(
+                "Interests",
+                value=profile.interests if profile else "",
+                help="Comma-separated values",
+            )
 
         submitted = st.form_submit_button("Save Profile", use_container_width=True)
         if submitted:
@@ -104,12 +121,16 @@ with saved_tab:
                 panel("Academic profile")
                 st.write(f"**Email:** {profile.email or 'Not set'}")
                 st.write(f"**College:** {profile.college or 'Not set'}")
-                st.write(f"**Degree / Branch:** {profile.degree or 'Not set'} / {profile.branch or 'Not set'}")
+                st.write(
+                    f"**Degree / Branch:** {profile.degree or 'Not set'} / {profile.branch or 'Not set'}"
+                )
                 st.write(f"**Graduation Year:** {profile.graduation_year or 'Not set'}")
-        with right:
-            with st.container(border=True):
-                panel("Career signals")
-                st.write(f"**Skills:** {profile.skills or 'Not set'}")
-                st.write(f"**Interests:** {profile.interests or 'Not set'}")
+        with right, st.container(border=True):
+            panel("Career signals")
+            st.write(f"**Skills:** {profile.skills or 'Not set'}")
+            st.write(f"**Interests:** {profile.interests or 'Not set'}")
     else:
-        empty_state("No saved profile yet", "Complete the form to personalize recommendations, roadmaps, and resume scoring.")
+        empty_state(
+            "No saved profile yet",
+            "Complete the form to personalize recommendations, roadmaps, and resume scoring.",
+        )

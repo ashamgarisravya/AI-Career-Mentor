@@ -8,6 +8,7 @@ from typing import Any
 
 from utils.ai import ai_json
 
+
 @dataclass(frozen=True)
 class Career:
     title: str
@@ -48,8 +49,20 @@ CAREERS: tuple[Career, ...] = (
         "Product and Analytics",
         "INR 6-18 LPA",
         "High growth in SaaS, fintech, marketplace, and consumer product teams",
-        ("SQL", "Analytics", "Experimentation", "Visualization", "Communication", "Product Metrics"),
-        ("Mode SQL Tutorial", "A/B testing practice", "Product teardown notes", "Metric design case studies"),
+        (
+            "SQL",
+            "Analytics",
+            "Experimentation",
+            "Visualization",
+            "Communication",
+            "Product Metrics",
+        ),
+        (
+            "Mode SQL Tutorial",
+            "A/B testing practice",
+            "Product teardown notes",
+            "Metric design case studies",
+        ),
     ),
     Career(
         "Cloud Data Engineer",
@@ -65,7 +78,12 @@ CAREERS: tuple[Career, ...] = (
         "INR 7-20 LPA",
         "High growth as organizations expand security operations",
         ("Networking", "Linux", "SIEM", "Incident Response", "Python", "Risk Analysis"),
-        ("TryHackMe SOC paths", "Blue Team Labs", "Security+ objectives", "Incident report practice"),
+        (
+            "TryHackMe SOC paths",
+            "Blue Team Labs",
+            "Security+ objectives",
+            "Incident report practice",
+        ),
     ),
     Career(
         "DevOps Engineer",
@@ -171,7 +189,9 @@ def find_career(target: str) -> Career:
         if career.title.lower() == target_lower:
             return career
     for career in CAREERS:
-        if target_lower and (target_lower in career.title.lower() or career.title.lower() in target_lower):
+        if target_lower and (
+            target_lower in career.title.lower() or career.title.lower() in target_lower
+        ):
             return career
     return CAREERS[1]
 
@@ -233,17 +253,40 @@ def recommend_careers(
         )
         industry_bonus = 10 if industry_lower and industry_lower in career.industry.lower() else 0
         education_bonus = 6 if education_lower else 0
-        resume_bonus = min(14, sum(1 for skill in career.required_skills if text_has_skill(resume_lower, skill)) * 3)
+        resume_bonus = min(
+            14,
+            sum(1 for skill in career.required_skills if text_has_skill(resume_lower, skill)) * 3,
+        )
         gap_penalty = min(10, len(required & known_gaps) * 2)
-        score = max(25, min(98, 28 + skill_hits * 9 + interest_hits * 3 + industry_bonus + education_bonus + resume_bonus - gap_penalty))
-        matched = [skill for skill in career.required_skills if skill.lower() in skill_set or text_has_skill(resume_lower, skill)]
+        score = max(
+            25,
+            min(
+                98,
+                28
+                + skill_hits * 9
+                + interest_hits * 3
+                + industry_bonus
+                + education_bonus
+                + resume_bonus
+                - gap_penalty,
+            ),
+        )
+        matched = [
+            skill
+            for skill in career.required_skills
+            if skill.lower() in skill_set or text_has_skill(resume_lower, skill)
+        ]
 
         if matched:
             reason = f"Strongest fit because your profile/resume shows {', '.join(matched[:4])}."
         elif interest_hits:
-            reason = f"Good exploratory fit because your interests align with {career.industry} work."
+            reason = (
+                f"Good exploratory fit because your interests align with {career.industry} work."
+            )
         else:
-            reason = f"Potential fit if you build evidence for {', '.join(career.required_skills[:3])}."
+            reason = (
+                f"Potential fit if you build evidence for {', '.join(career.required_skills[:3])}."
+            )
 
         recommendations.append(
             {
@@ -284,11 +327,18 @@ def recommend_careers(
             },
         }
     )
-    result = ai_json(task="career recommendation", prompt=prompt, fallback={"recommendations": fallback}, expected_type=dict)
+    result = ai_json(
+        task="career recommendation",
+        prompt=prompt,
+        fallback={"recommendations": fallback},
+        expected_type=dict,
+    )
     return _valid_recommendations(result.get("recommendations"), fallback)
 
 
-def analyze_skill_gap(current_skills: list[str], target_career: str, resume_text: str = "") -> list[dict[str, Any]]:
+def analyze_skill_gap(
+    current_skills: list[str], target_career: str, resume_text: str = ""
+) -> list[dict[str, Any]]:
     """Build prioritized skill-gap rows for a selected target career."""
     career = find_career(target_career)
     detected = extract_skills_from_text(resume_text)
@@ -299,7 +349,14 @@ def analyze_skill_gap(current_skills: list[str], target_career: str, resume_text
     for index, skill in enumerate(missing):
         priority = "High" if index < 2 else "Medium" if index < 4 else "Low"
         weeks = 4 if priority == "High" else 3 if priority == "Medium" else 2
-        if skill in {"Deep Learning", "LLMs", "Cloud", "Data Warehousing", "Orchestration", "Incident Response"}:
+        if skill in {
+            "Deep Learning",
+            "LLMs",
+            "Cloud",
+            "Data Warehousing",
+            "Orchestration",
+            "Incident Response",
+        }:
             difficulty = "Intermediate"
             weeks += 1
         else:
@@ -328,7 +385,9 @@ def analyze_skill_gap(current_skills: list[str], target_career: str, resume_text
             },
         }
     )
-    result = ai_json(task="skill gap analysis", prompt=prompt, fallback={"gaps": rows}, expected_type=dict)
+    result = ai_json(
+        task="skill gap analysis", prompt=prompt, fallback={"gaps": rows}, expected_type=dict
+    )
     return _valid_gap_rows(result.get("gaps"), rows)
 
 
@@ -338,7 +397,9 @@ def _json_prompt(payload: dict[str, Any]) -> str:
     return json.dumps(payload, ensure_ascii=True)
 
 
-def _valid_recommendations(value: Any, fallback: list[dict[str, object]]) -> list[dict[str, object]]:
+def _valid_recommendations(
+    value: Any, fallback: list[dict[str, object]]
+) -> list[dict[str, object]]:
     if not isinstance(value, list):
         return fallback
     valid = []
@@ -358,8 +419,12 @@ def _valid_recommendations(value: Any, fallback: list[dict[str, object]]) -> lis
                 "match": match,
                 "salary_range": str(item.get("salary_range", base.get("salary_range", ""))),
                 "growth": str(item.get("growth", base.get("growth", ""))),
-                "required_skills": _as_list(item.get("required_skills"), list(base.get("required_skills", []))),
-                "missing_skills": _as_list(item.get("missing_skills"), list(base.get("missing_skills", []))),
+                "required_skills": _as_list(
+                    item.get("required_skills"), list(base.get("required_skills", []))
+                ),
+                "missing_skills": _as_list(
+                    item.get("missing_skills"), list(base.get("missing_skills", []))
+                ),
                 "why": str(item.get("why", base.get("why", ""))),
                 "resources": _as_list(item.get("resources"), list(base.get("resources", []))),
             }
@@ -380,7 +445,12 @@ def _valid_gap_rows(value: Any, fallback: list[dict[str, Any]]) -> list[dict[str
                 "Priority": str(item.get("Priority", "Medium")),
                 "Difficulty": str(item.get("Difficulty", "Intermediate")),
                 "Estimated Learning Time": str(item.get("Estimated Learning Time", "2-4 weeks")),
-                "Recommended Learning Path": str(item.get("Recommended Learning Path", "Learn fundamentals, complete a guided lab, and build one portfolio task.")),
+                "Recommended Learning Path": str(
+                    item.get(
+                        "Recommended Learning Path",
+                        "Learn fundamentals, complete a guided lab, and build one portfolio task.",
+                    )
+                ),
                 "Progress Weight": item.get("Progress Weight", 10),
             }
         )

@@ -19,7 +19,6 @@ from utils.knowledge import recommend_careers
 from utils.production import get_logger
 from utils.ui import badge, bullet_list, inject_styles, page_header, panel, status_kind
 
-
 st.set_page_config(page_title="Career Recommendation | AI Career Mentor", layout="wide")
 inject_styles()
 initialize_database()
@@ -34,7 +33,10 @@ page_header(
 )
 
 with st.form("career_form"):
-    panel("Recommendation inputs", "Tune skills, interests, education, and target industry without changing saved profile data.")
+    panel(
+        "Recommendation inputs",
+        "Tune skills, interests, education, and target industry without changing saved profile data.",
+    )
     c1, c2 = st.columns(2)
     with c1:
         skills_text = st.text_area("Skills", value=profile.skills if profile else "")
@@ -66,7 +68,9 @@ if submitted:
                 target_industry=industry,
                 recommendations=recommendations,
             )
-            add_activity("Career recommendations generated", f"Top role: {recommendations[0]['title']}")
+            add_activity(
+                "Career recommendations generated", f"Top role: {recommendations[0]['title']}"
+            )
         except sqlite3.Error as exc:
             logger.exception("Career recommendation save failed: %s", exc)
             st.error("Recommendations were generated but could not be saved to history.")
@@ -90,29 +94,30 @@ st.markdown(
 )
 
 table_tab, detail_tab = st.tabs(["Compare Roles", "Role Details"])
-with table_tab:
-    with st.container(border=True):
-        panel("Top career matches")
-        st.dataframe(
-            pd.DataFrame(
-                [
-                    {
-                        "Career": item["title"],
-                        "Match": f"{item['match']}%",
-                        "Salary": item["salary_range"],
-                        "Growth": item["growth"],
-                        "Industry": item["industry"],
-                    }
-                    for item in recommendations
-                ]
-            ),
-            use_container_width=True,
-            hide_index=True,
-        )
+with table_tab, st.container(border=True):
+    panel("Top career matches")
+    st.dataframe(
+        pd.DataFrame(
+            [
+                {
+                    "Career": item["title"],
+                    "Match": f"{item['match']}%",
+                    "Salary": item["salary_range"],
+                    "Growth": item["growth"],
+                    "Industry": item["industry"],
+                }
+                for item in recommendations
+            ]
+        ),
+        use_container_width=True,
+        hide_index=True,
+    )
 
 with detail_tab:
     for item in recommendations[:3]:
-        with st.expander(f"{item['title']} - {item['match']}% match", expanded=item is recommendations[0]):
+        with st.expander(
+            f"{item['title']} - {item['match']}% match", expanded=item is recommendations[0]
+        ):
             left, right = st.columns([1.2, 1])
             with left:
                 st.write(f"**Expected Salary:** {item['salary_range']}")

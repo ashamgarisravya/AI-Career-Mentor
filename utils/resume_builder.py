@@ -6,7 +6,6 @@ import re
 from io import BytesIO
 from typing import Any
 
-
 REQUIRED_FIELDS = ("name", "email", "education", "skills")
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
@@ -161,7 +160,9 @@ def _add_skills(story: list[Any], skills: str, styles: Any) -> None:
     items = _split_items(skills)
     rows = []
     for index in range(0, len(items), 3):
-        rows.append([Paragraph(_xml(item), styles["ResumeBody"]) for item in items[index : index + 3]])
+        rows.append(
+            [Paragraph(_xml(item), styles["ResumeBody"]) for item in items[index : index + 3]]
+        )
     story.append(Paragraph("SKILLS", styles["SectionTitle"]))
     table = Table(rows, hAlign="LEFT", colWidths=[170, 170, 170])
     table.setStyle(
@@ -196,7 +197,12 @@ def _bulletize(line: str) -> str:
 
 
 def _contact_line(data: dict[str, str]) -> str:
-    parts = [data.get("email", ""), data.get("phone", ""), data.get("location", ""), data.get("links", "")]
+    parts = [
+        data.get("email", ""),
+        data.get("phone", ""),
+        data.get("location", ""),
+        data.get("links", ""),
+    ]
     return " | ".join(_xml(part) for part in parts if part)
 
 

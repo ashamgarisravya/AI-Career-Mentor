@@ -1,0 +1,17 @@
+.venv
+**pycache**
+**/__pycache__/
+.git
+generated
+*.db
+*.log
+.env
+.env.*
+logs/
+database/*.db
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache
+.mypy_cache
+.ruff_cache

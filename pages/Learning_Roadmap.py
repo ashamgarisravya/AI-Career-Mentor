@@ -7,10 +7,9 @@ import sqlite3
 import streamlit as st
 
 from utils.database import add_activity, initialize_database, load_profile, save_roadmap, split_list
-from utils.roadmap import calculate_progress, generate_roadmaps
 from utils.production import get_logger
+from utils.roadmap import calculate_progress, generate_roadmaps
 from utils.ui import badge, bullet_list, inject_styles, page_header, panel, status_kind
-
 
 st.set_page_config(page_title="Learning Roadmap | AI Career Mentor", layout="wide")
 inject_styles()
@@ -23,7 +22,12 @@ page_header(
     "Plan the next 90 days with weekly milestones, project work, resources, and progress tracking.",
     [("30/60/90 plan", "info"), ("Progress tracking", "success")],
 )
-target = st.text_input("Target Career", value=profile.target_career if profile else "AI Engineer").strip() or "AI Engineer"
+target = (
+    st.text_input(
+        "Target Career", value=profile.target_career if profile else "AI Engineer"
+    ).strip()
+    or "AI Engineer"
+)
 skills = split_list(profile.skills) if profile else []
 
 with st.spinner("Preparing roadmap..."):
@@ -39,7 +43,9 @@ add = st.button("Refresh Roadmap", use_container_width=True)
 if add:
     with st.spinner("Saving roadmap snapshot..."):
         try:
-            save_roadmap(target_career=target, skills=skills, roadmap=roadmaps, progress=progress_percent)
+            save_roadmap(
+                target_career=target, skills=skills, roadmap=roadmaps, progress=progress_percent
+            )
             add_activity("Learning roadmap generated", f"Roadmap for {target}")
         except sqlite3.Error as exc:
             logger.exception("Roadmap save failed: %s", exc)
@@ -50,7 +56,9 @@ c1, c2, c3 = st.columns(3)
 c1.metric("Learning Progress", f"{progress_percent}%")
 c2.metric("Target Career", target)
 c3.metric("Milestones", sum(len(items) for items in roadmaps.values()))
-st.markdown(badge(f"{progress_percent}% complete", status_kind(progress_percent)), unsafe_allow_html=True)
+st.markdown(
+    badge(f"{progress_percent}% complete", status_kind(progress_percent)), unsafe_allow_html=True
+)
 st.progress(progress_percent / 100)
 
 tabs = st.tabs(list(roadmaps.keys()))

@@ -8,7 +8,6 @@ from PyPDF2.errors import PdfReadError
 
 from utils.production import get_logger
 
-
 logger = get_logger(__name__)
 
 

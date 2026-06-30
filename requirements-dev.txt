@@ -1,0 +1,13 @@
+black==26.3.1
+coverage==7.13.0
+pip-audit==2.10.0
+pre-commit==4.6.0
+pytest==9.0.3
+pytest-cov==7.0.0
+ruff==0.15.17
+mypy==2.1.0
+flake8==7.3.0
+pylint==4.0.6
+bandit==1.9.4
+vulture==2.16
+pyupgrade==3.21.2

@@ -8,7 +8,6 @@ from utils.database import initialize_database
 from utils.production import get_logger
 from utils.ui import inject_styles, page_header
 
-
 APP_TITLE = "AI Career Mentor"
 logger = get_logger(__name__)
 PAGES = [
@@ -78,7 +77,11 @@ def main() -> None:
     page_header(
         APP_TITLE,
         "A professional workspace for resume scoring, career fit, learning plans, and interview readiness.",
-        [("Resume intelligence", "info"), ("Career planning", "success"), ("Interview prep", "warning")],
+        [
+            ("Resume intelligence", "info"),
+            ("Career planning", "success"),
+            ("Interview prep", "warning"),
+        ],
     )
     left, middle, right = st.columns(3)
     left.metric("Workflow", "9 pages")

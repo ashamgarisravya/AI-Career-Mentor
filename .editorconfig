@@ -4,6 +4,7 @@ root = true
 charset = utf-8
 end_of_line = lf
 insert_final_newline = true
+<<<<<<< HEAD
 indent_style = space
 indent_size = 4
 trim_trailing_whitespace = true
@@ -16,3 +17,19 @@ indent_size = 4
 
 [Makefile]
 indent_style = tab
+=======
+trim_trailing_whitespace = true
+
+[*.py]
+indent_style = space
+indent_size = 4
+max_line_length = 100
+
+[*.{md,yml,yaml,toml,txt,env,example}]
+indent_style = space
+indent_size = 2
+
+[Dockerfile]
+indent_style = space
+indent_size = 4
+>>>>>>> e69c4c20fcd8ce728d68f783ea11e37a6cd49d35

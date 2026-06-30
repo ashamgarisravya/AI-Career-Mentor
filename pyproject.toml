@@ -1,0 +1,110 @@
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+src = ["."]
+extend-exclude = [
+  ".venv",
+  "venv",
+  "env",
+  "database",
+  "generated",
+  "logs",
+]
+
+[tool.ruff.lint]
+select = [
+  "E",
+  "F",
+  "I",
+  "B",
+  "UP",
+  "SIM",
+]
+ignore = [
+  "E501",
+  "SIM108",
+  "SIM117",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"pages/*.py" = ["B018"]
+"tests/*.py" = ["B018"]
+"vulture_whitelist.py" = ["B018"]
+
+[tool.black]
+target-version = ["py311"]
+line-length = 100
+extend-exclude = '''
+/(
+  \.venv
+  | venv
+  | env
+  | database
+  | generated
+  | logs
+)/
+'''
+
+[tool.mypy]
+python_version = "3.11"
+files = ["app.py", "pages", "utils"]
+exclude = [
+  "^\\.venv/",
+  "^venv/",
+  "^env/",
+  "^database/",
+  "^generated/",
+  "^logs/",
+]
+ignore_missing_imports = true
+check_untyped_defs = true
+no_implicit_optional = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+warn_return_any = false
+disable_error_code = [
+  "arg-type",
+  "assignment",
+  "call-overload",
+  "import-untyped",
+  "no-untyped-call",
+]
+
+[tool.pylint.main]
+py-version = "3.11"
+ignore = [".venv", "venv", "env", "database", "generated", "logs"]
+jobs = 0
+persistent = false
+
+[tool.pylint.messages_control]
+disable = [
+  "C0114",
+  "C0115",
+  "C0116",
+  "C0301",
+  "C0103",
+  "C0415",
+  "R0903",
+  "R0902",
+  "R0913",
+  "R0914",
+  "R0915",
+  "R0917",
+  "W0511",
+  "duplicate-code",
+  "broad-exception-caught",
+  "too-many-locals",
+  "too-many-branches",
+  "too-many-statements",
+]
+
+[tool.pylint.format]
+max-line-length = 100
+
+[tool.bandit]
+exclude_dirs = [".venv", "venv", "env", "database", "generated", "logs"]
+skips = ["B101", "B110", "B310"]
+
+[tool.pip-audit]
+requirement = ["requirements.txt", "requirements-dev.txt"]
+disable-pip = true

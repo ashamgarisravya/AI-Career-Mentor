@@ -47,41 +47,44 @@ Key design points:
 
 ```text
 AI Career Mentor/
-├── app.py
-├── requirements.txt
-├── .env.example
-├── README.md
-├── docs/
-│   ├── INSTALLATION.md
-│   ├── USER_GUIDE.md
-│   └── DEPLOYMENT.md
-├── pages/
-│   ├── Dashboard.py
-│   ├── Profile.py
-│   ├── Resume_Analyzer.py
-│   ├── Career_Recommendation.py
-│   ├── Skill_Gap.py
-│   ├── Learning_Roadmap.py
-│   ├── Interview_Prep.py
-│   ├── Resume_Builder.py
-│   └── Settings.py
-├── utils/
-│   ├── ai.py
-│   ├── ats.py
-│   ├── charts.py
-│   ├── database.py
-│   ├── interview.py
-│   ├── knowledge.py
-│   ├── pdf_parser.py
-│   ├── production.py
-│   ├── resume_builder.py
-│   ├── roadmap.py
-│   └── ui.py
-├── database/
-│   └── app.db
-├── generated/
-├── logs/
-└── assets/
+|-- app.py
+|-- requirements.txt
+|-- .env.example
+|-- README.md
+|-- USER_MANUAL.md
+|-- AGENTS.md
+|-- SECURITY.md
+|-- Dockerfile
+|-- docs/
+|   |-- INSTALLATION.md
+|   |-- USER_GUIDE.md
+|   `-- DEPLOYMENT.md
+|-- pages/
+|   |-- Dashboard.py
+|   |-- Profile.py
+|   |-- Resume_Analyzer.py
+|   |-- Career_Recommendation.py
+|   |-- Skill_Gap.py
+|   |-- Learning_Roadmap.py
+|   |-- Interview_Prep.py
+|   |-- Resume_Builder.py
+|   `-- Settings.py
+|-- utils/
+|   |-- ai.py
+|   |-- ats.py
+|   |-- charts.py
+|   |-- database.py
+|   |-- interview.py
+|   |-- knowledge.py
+|   |-- pdf_parser.py
+|   |-- production.py
+|   |-- resume_builder.py
+|   |-- roadmap.py
+|   `-- ui.py
+|-- database/
+|-- generated/
+|-- logs/
+`-- assets/
 ```
 
 ## Installation
@@ -144,6 +147,54 @@ If port `8501` is busy:
 streamlit run app.py --server.port 8502
 ```
 
+## Development Tooling
+
+Install development tools:
+
+```bash
+python -m pip install -r requirements-dev.txt
+```
+
+Install Git hooks:
+
+```bash
+python -m pre_commit install
+```
+
+Run code quality checks:
+
+```bash
+python -m ruff check app.py pages utils
+python -m mypy app.py pages utils
+python -m flake8 app.py pages utils
+python -m pylint app.py pages utils
+python -m bandit -c pyproject.toml -r app.py pages utils
+python -m vulture app.py pages utils vulture_whitelist.py --min-confidence 100
+$files = @("app.py") + (Get-ChildItem pages,utils -Filter *.py | ForEach-Object { $_.FullName })
+python -m pyupgrade --py311-plus @files
+```
+
+Run formatting and repository automation checks:
+
+```bash
+python -m black --check app.py pages utils tests
+python -m pytest
+python -m pip_audit --disable-pip --no-deps --cache-dir .pip-audit-cache --ignore-vuln PYSEC-2026-212 --ignore-vuln CVE-2026-33682 -r requirements.txt -r requirements-dev.txt
+python -m pre_commit run --all-files
+```
+
+Pytest is configured in `pytest.ini`, and coverage.py is configured in `.coveragerc` with an 80% fail-under threshold for the tested business modules. The default `python -m pytest` command prints missing coverage lines and writes `coverage.xml`.
+
+Run the optional Streamlit page smoke test when you want runtime page coverage:
+
+```bash
+python -m pytest -m "integration" --no-cov
+```
+
+The repository also includes GitHub Actions workflows for Ruff, Mypy, Bandit, pip-audit, Gitleaks secret scanning, test coverage artifact upload, and changelog generation from tags using git-cliff.
+
+The pip-audit command ignores two Streamlit advisories while the application is intentionally pinned to Streamlit `1.41.1` for compatibility. Remove the `--ignore-vuln` flags when the project is approved to upgrade Streamlit.
+
 ## Screenshots
 
 Add screenshots to `assets/screenshots/` and update these placeholders.
@@ -171,6 +222,9 @@ Suggested README embeds:
 - [Installation Guide](docs/INSTALLATION.md)
 - [User Guide](docs/USER_GUIDE.md)
 - [Deployment Guide](docs/DEPLOYMENT.md)
+- [User Manual](USER_MANUAL.md)
+- [Agents and Modules](AGENTS.md)
+- [Security Policy](SECURITY.md)
 
 ## Future Scope
 

@@ -15,7 +15,6 @@ from utils.knowledge import (
     text_has_skill,
 )
 
-
 ACTION_WORDS = (
     "achieved",
     "analyzed",
@@ -33,14 +32,18 @@ ACTION_WORDS = (
     "shipped",
 )
 CONTACT_RE = re.compile(r"[\w.+-]+@[\w-]+\.[\w.-]+")
-METRIC_RE = re.compile(r"\b\d+(?:\.\d+)?\s*(?:%|x|k|m|users|hours|days|projects|models|apis|dashboards)\b", re.I)
+METRIC_RE = re.compile(
+    r"\b\d+(?:\.\d+)?\s*(?:%|x|k|m|users|hours|days|projects|models|apis|dashboards)\b", re.I
+)
 
 
 def _sentences(text: str) -> list[str]:
     return [part.strip() for part in re.split(r"(?<=[.!?])\s+|\n+", text) if part.strip()]
 
 
-def _summary(text: str, career_title: str, score: int, detected: list[str], missing: list[str]) -> str:
+def _summary(
+    text: str, career_title: str, score: int, detected: list[str], missing: list[str]
+) -> str:
     sentences = _sentences(text)
     lead = sentences[0][:220] if sentences else "The resume has limited readable text."
     return (
@@ -75,13 +78,27 @@ def analyze_resume_text(
     has_metrics = bool(METRIC_RE.search(text))
     action_hits = sorted({word for word in ACTION_WORDS if re.search(rf"\b{word}\b", lowered)})
     section_score = sum(1 for present in sections.values() if present) * 5
-    skill_score = min(28, sum(1 for skill in career.required_skills if skill in detected_skills) * 5)
+    skill_score = min(
+        28, sum(1 for skill in career.required_skills if skill in detected_skills) * 5
+    )
     keyword_score = min(16, (len(role_keywords) - len(missing_keywords)) * 2)
     length_score = 12 if 250 <= word_count <= 900 else 8 if word_count >= 120 else 3
     contact_score = 8 if has_email else 0
     impact_score = 12 if has_metrics else 4 if action_hits else 0
     action_score = min(12, len(action_hits) * 3)
-    ats_score = max(10, min(100, section_score + skill_score + keyword_score + length_score + contact_score + impact_score + action_score))
+    ats_score = max(
+        10,
+        min(
+            100,
+            section_score
+            + skill_score
+            + keyword_score
+            + length_score
+            + contact_score
+            + impact_score
+            + action_score,
+        ),
+    )
 
     strengths = []
     if has_email:
@@ -106,9 +123,13 @@ def analyze_resume_text(
         if not present and section in {"skills", "projects", "experience", "education"}:
             weaknesses.append(f"Missing or unclear {section} section.")
     if not has_metrics:
-        weaknesses.append("Achievements need measurable outcomes such as accuracy, users, time saved, or revenue impact.")
+        weaknesses.append(
+            "Achievements need measurable outcomes such as accuracy, users, time saved, or revenue impact."
+        )
     if missing_skills:
-        weaknesses.append(f"Missing target skills for {career.title}: {', '.join(missing_skills[:5])}.")
+        weaknesses.append(
+            f"Missing target skills for {career.title}: {', '.join(missing_skills[:5])}."
+        )
 
     suggestions = [
         "Use standard headings: Summary, Skills, Experience, Projects, Education, Certifications.",
@@ -118,9 +139,13 @@ def analyze_resume_text(
     if missing_keywords:
         suggestions.append(f"Add role keywords naturally: {', '.join(missing_keywords[:6])}.")
     if not has_metrics:
-        suggestions.append("Add at least three quantified bullets, for example accuracy improved, time reduced, or users served.")
+        suggestions.append(
+            "Add at least three quantified bullets, for example accuracy improved, time reduced, or users served."
+        )
     if word_count < 250:
-        suggestions.append("Expand the resume with concise project responsibilities, tools used, and outcomes.")
+        suggestions.append(
+            "Expand the resume with concise project responsibilities, tools used, and outcomes."
+        )
 
     fallback = {
         "ats_score": ats_score,
@@ -179,7 +204,9 @@ def _valid_resume_analysis(result: dict[str, Any], fallback: dict[str, Any]) -> 
         "strengths": _string_list(result.get("strengths"), fallback["strengths"]),
         "weaknesses": _string_list(result.get("weaknesses"), fallback["weaknesses"]),
         "missing_skills": _string_list(result.get("missing_skills"), fallback["missing_skills"]),
-        "missing_keywords": _string_list(result.get("missing_keywords"), fallback["missing_keywords"]),
+        "missing_keywords": _string_list(
+            result.get("missing_keywords"), fallback["missing_keywords"]
+        ),
         "suggestions": _string_list(result.get("suggestions"), fallback["suggestions"]),
         "summary": str(result.get("summary") or fallback["summary"]).strip(),
     }
