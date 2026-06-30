@@ -1,32 +1,72 @@
 # AI Career Mentor Feature Specification
 
-## Overview
-AI Career Mentor is an AI-powered platform that helps users identify career paths, review resumes, and improve their skills through tailored guidance.
+## Feature Name
 
-## Features
+AI Career Mentor
 
-### Career Recommendation
-Suggest careers based on the user's skills, interests, and experience level.
+---
 
-### Skill Gap Analysis
-Identify missing skills for target roles and recommend practical next steps.
+## Objectives
 
-### Learning Recommendations
-Recommend courses, resources, and learning activities aligned with the user's target career.
+Provide an AI-powered platform for students and job seekers to improve career readiness.
 
-### Interview Preparation
-Generate target-role interview questions, answer tips, and a short practice plan from the saved profile and skill gaps.
+---
 
-### AI Guidance
-Provide personalized career advice that explains the rationale behind each recommendation.
+## Functional Requirements
 
-## Goals
-- Improve career planning.
-- Help users identify skill gaps.
-- Recommend learning resources.
-- Make guidance actionable for interviews and next steps.
+- User Profile
+- Resume Upload
+- Resume Analysis
+- ATS Score
+- Career Recommendation
+- Skill Gap Analysis
+- Learning Roadmap
+- Interview Preparation
+- Resume Builder
 
-## Success Metrics
-- Accurate career recommendations.
-- Positive user feedback.
-- Increased user engagement.
+---
+
+## Non Functional Requirements
+
+- Responsive UI
+- Fast Performance
+- Secure User Data
+- Easy Navigation
+- SQLite Storage
+
+---
+
+## User Stories
+
+### Student
+
+Upload a resume and receive ATS feedback.
+
+### Job Seeker
+
+Receive personalized career recommendations.
+
+### Learner
+
+Generate a roadmap to learn required skills.
+
+---
+
+## Acceptance Criteria
+
+- Resume analysis completes successfully.
+- Career recommendations are generated.
+- Skill gaps are identified.
+- Learning roadmap is displayed.
+- Interview questions are generated.
+- Resume builder exports a resume.
+
+---
+
+## Future Improvements
+
+- Authentication
+- Cloud Database
+- AI Chat Assistant
+- Recruiter Dashboard
+- Resume Version History
